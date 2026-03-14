@@ -99,12 +99,15 @@ public class DoctorController {
             @RequestParam(value = "draw", required = false, defaultValue = "1") int draw,
             @RequestParam(value = "start", required = false, defaultValue = "0") int start,
             @RequestParam(value = "length", required = false, defaultValue = "10") int length,
-            @RequestParam(value = "keyword", required = false) String keyword) {
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "specialtyId", required = false) Long specialtyId,
+            @RequestParam(value = "hospitalId", required = false) Long hospitalId,
+            @RequestParam(value = "gender", required = false) String gender) {
 
         int page = start / length;
         Pageable pageable = PageRequest.of(page, length, Sort.by("id").descending());
 
-        Page<Doctor> doctorPage = doctorService.getDoctorsDatatable(keyword, pageable);
+        Page<Doctor> doctorPage = doctorService.getDoctorsDatatable(keyword, specialtyId, hospitalId, gender, pageable);
 
         Map<String, Object> response = new HashMap<>();
         response.put("draw", draw);

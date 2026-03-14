@@ -11,8 +11,8 @@
             /* Choices.js Global Premium Styling */
             .choices { margin-bottom: 0; }
             .choices__inner {
-                border-radius: 1.25rem !important;
-                padding: 0.75rem 1.25rem !important;
+                border-radius: .75rem !important;
+                padding: 0.25rem 0.75rem !important;
                 background-color: #f8fafc !important;
                 border: 1px solid #e2e8f0 !important;
                 min-height: 56px;
@@ -26,7 +26,7 @@
                 box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
             }
             .choices__list--dropdown {
-                border-radius: 1.25rem !important;
+                border-radius: .75rem !important;
                 border: 1px solid #e2e8f0 !important;
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
                 padding: 8px !important;
@@ -71,12 +71,7 @@
             
             /* Search Input */
             .choices__input {
-                background-color: #f1f5f9 !important;
-                border-radius: 0.75rem !important;
-                padding: 10px 16px !important;
-                margin-bottom: 8px !important;
-                font-size: 13px !important;
-                border: 1px solid #e2e8f0 !important;
+                background-color: transparent !important;
             }
             /* Remove default arrow to use our own or style it */
             .choices[data-type*="select-one"]::after {
@@ -218,50 +213,62 @@
                     `;
                 };
 
+                const createPremiumTemplates = function(strToEl) {
+                    return {
+                        item: (classNames, data) => {
+                            const classes = classNames.classNames || classNames;
+                            const avatar = data.customProperties && data.customProperties.avatar ? data.customProperties.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.label) + '&background=f1f5f9&color=64748b&bold=true';
+                            
+                            // Check if we need to show the remove button (for multi-select)
+                            const removeBtn = data.placeholder ? '' : `
+                                <button type="button" class="${classes.button}" data-button aria-label="Remove item: '${data.value}'">
+                                    Remove item
+                                </button>
+                            `;
+
+                            return strToEl(`
+                                <div class="${classes.item} ${data.highlighted ? classes.highlightedState : classes.itemSelectable} ${data.placeholder ? classes.placeholder : ''}" 
+                                     data-item data-id="${data.id}" data-value="${data.value}" 
+                                     ${data.active ? 'aria-selected="true"' : ""} ${data.disabled ? 'aria-disabled="true"' : ""}>
+                                    <div class="flex items-center">
+                                        ${data.placeholder ? '' : `<img src="${avatar}" class="filter-avatar w-4 h-4 mr-2" style="margin-right: 6px;">`}
+                                        <span class="font-bold text-slate-700">${data.label}</span>
+                                    </div>
+                                    ${removeBtn}
+                                </div>
+                            `);
+                        },
+                        choice: (classNames, data) => {
+                            const classes = classNames.classNames || classNames;
+                            const avatar = data.customProperties && data.customProperties.avatar ? data.customProperties.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.label) + '&background=f1f5f9&color=64748b&bold=true';
+                            return strToEl(`
+                                <div class="${classes.item} ${classes.itemChoice} ${data.disabled ? classes.itemDisabled : classes.itemSelectable}" 
+                                     data-select-text="" data-choice 
+                                     ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : "data-choice-selectable"} 
+                                     data-id="${data.id}" data-value="${data.value}" role="option">
+                                    <div class="flex items-center">
+                                        ${data.placeholder ? '' : `<img src="${avatar}" class="filter-avatar w-6 h-6 mr-3">`}
+                                        <span>${data.label}</span>
+                                    </div>
+                                </div>
+                            `);
+                        }
+                    };
+                };
+
                 const choicesBaseOptions = {
                     searchEnabled: true,
                     itemSelectText: '',
                     allowHTML: true,
-                    callbackOnCreateTemplates: function(strToEl) {
-                        return {
-                            choice: (classNames, data) => {
-                                const img = data.customProperties && data.customProperties.img 
-                                            ? data.customProperties.img 
-                                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(data.label)}&background=f1f5f9&color=64748b`;
-                                return strToEl(`
-                                    <div class="${classNames.item} ${classNames.itemChoice} ${data.disabled ? classNames.itemDisabled : classNames.itemSelectable}" 
-                                         data-select-text="${this.config.itemSelectText}" data-choice ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'} 
-                                         data-id="${data.id}" data-value="${data.value}" role="option">
-                                        <div class="flex items-center gap-3">
-                                            <img src="${img}" class="choices-img" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(data.label)}&background=f1f5f9&color=64748b'">
-                                            <span class="font-bold text-sm text-slate-700">${data.label}</span>
-                                        </div>
-                                    </div>
-                                `);
-                            },
-                            item: (classNames, data) => {
-                                const img = data.customProperties && data.customProperties.img 
-                                            ? data.customProperties.img 
-                                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(data.label)}&background=f1f5f9&color=64748b`;
-                                return strToEl(`
-                                    <div class="${classNames.item} ${data.highlighted ? classNames.highlightedState : classNames.itemSelectable} ${data.placeholder ? classNames.placeholder : ''}" 
-                                         data-item data-id="${data.id}" data-value="${data.value}" ${data.active ? 'aria-selected="true"' : ''} ${data.disabled ? 'aria-disabled="true"' : ''}>
-                                        <div class="flex items-center gap-3">
-                                            <img src="${img}" class="choices-img" style="width: 24px; height: 24px; border-radius: 6px;">
-                                            <span class="font-bold text-sm text-slate-700">${data.label}</span>
-                                        </div>
-                                    </div>
-                                `);
-                            }
-                        };
-                    }
+                    callbackOnCreateTemplates: createPremiumTemplates
                 };
 
                 // Initialize Specialty Select via API
                 const specialtyChoice = new Choices('#specialtySelect', {
                     ...choicesBaseOptions,
                     placeholder: true,
-                    placeholderValue: 'Chọn chuyên khoa...'
+                    placeholderValue: 'Chọn chuyên khoa...',
+                    searchPlaceholderValue: 'Tìm tên chuyên khoa...'
                 });
 
                 fetch('/api/v1/specialties/search')
@@ -272,7 +279,7 @@
                             value: s.id,
                             label: s.name,
                             selected: s.id == currentVal,
-                            customProperties: { img: s.imageUrl }
+                            customProperties: { avatar: s.imageUrl }
                         }));
                         specialtyChoice.setChoices(choices, 'value', 'label', true);
                     });
@@ -282,7 +289,8 @@
                     ...choicesBaseOptions,
                     removeItemButton: true,
                     placeholder: true,
-                    placeholderValue: 'Tìm chọn bệnh viện...'
+                    placeholderValue: 'Tìm chọn bệnh viện...',
+                    searchPlaceholderValue: 'Tìm tên bệnh viện...'
                 });
 
                 fetch('/api/v1/hospitals/search')
@@ -295,7 +303,7 @@
                             value: h.id,
                             label: h.name,
                             selected: selectedIds.includes(h.id.toString()),
-                            customProperties: { img: h.imageUrl }
+                            customProperties: { avatar: h.imageUrl }
                         }));
                         hospitalChoice.setChoices(choices, 'value', 'label', true);
                     });

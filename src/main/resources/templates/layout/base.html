@@ -11,6 +11,7 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/choices-custom.css}"/>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
@@ -38,15 +39,6 @@
         .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: #f8fafc; }
         .nav-item.active { background: #0284c7; color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
         .glass-header { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(10px); }
-        
-        .choices__inner {
-            background-color: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 1rem !important;
-            padding: 0.5rem 1rem !important;
-            min-height: 52px !important;
-        }
-        .choices.is-focused .choices__inner { border-color: #0ea5e9 !important; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1) !important; }
     </style>
     <th:block th:replace="${head_part} ?: ~{}"></th:block>
 </head>

@@ -1,0 +1,147 @@
+/* 
+   MediHub Custom Choices.js Theme
+   Inspired by AdminX but tailored for a more breathable (thoáng) layout.
+*/
+
+:root {
+    --choices-primary: #0ea5e9;
+    --choices-primary-rgb: 14, 165, 233;
+    --choices-border: #e2e8f0;
+    --choices-bg: #ffffff;
+    --choices-text: #1e293b;
+    --choices-highlight: #f1f5f9;
+    --choices-radius: 12px;
+}
+
+/* Global Container */
+.choices {
+    margin-bottom: 0 !important;
+    border-radius: var(--choices-radius) !important;
+}
+
+/* Main Input Bar */
+.choices__inner {
+    background-color: var(--choices-bg) !important;
+    border: 1px solid var(--choices-border) !important;
+    border-radius: var(--choices-radius) !important;
+    min-height: 46px !important;
+    padding: 0 16px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    transition: all 0.2s ease !important;
+    font-size: 14px !important;
+}
+
+.choices[is-focused] .choices__inner {
+    border-color: var(--choices-primary) !important;
+    box-shadow: 0 0 0 4px rgba(var(--choices-primary-rgb), 0.1) !important;
+}
+
+.choices__list--single .choices__item {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Dropdown Container */
+.choices__list--dropdown {
+    border-radius: var(--choices-radius) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid var(--choices-border) !important;
+    margin-top: 8px !important;
+    overflow: hidden !important;
+    z-index: 1001 !important;
+    background-color: var(--choices-bg) !important;
+}
+
+.choices__list--dropdown .choices__list {
+    padding-bottom: 10px !important;
+}
+
+/* Search input inside dropdown */
+.choices__list--dropdown .choices__input {
+    background-color: var(--choices-bg) !important;
+    border: 1px solid var(--choices-border) !important;
+    padding: 10px 14px !important;
+    margin: 10px !important;
+    width: calc(100% - 20px) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+}
+
+/* Dropdown items (Selectable) */
+.choices__list--dropdown .choices__item--selectable {
+    padding: 12px 18px !important; /* Breathable spacing */
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: background 0.2s ease !important;
+    margin: 0 4px !important;
+    border-radius: 8px !important;
+}
+
+.choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background-color: var(--choices-highlight) !important;
+    color: var(--choices-primary) !important;
+}
+
+.choices__item--disabled {
+    font-weight: bold !important;
+    font-style: italic !important;
+    color: #94a3b8 !important;
+    background-color: #f8fafc !important;
+    cursor: default !important;
+    pointer-events: none !important;
+}
+
+/* Utility: Half width choice */
+.choices.custom-choice-half {
+    max-width: 50% !important;
+    width: 100% !important;
+}
+
+/* Avatar integration */
+.filter-avatar {
+    width: 26px; height: 26px; border-radius: 6px; 
+    object-fit: cover; border: 1.5px solid #f1f5f9;
+    margin-right: 10px;
+}
+
+/* Multi-select Items (Tags) */
+.choices .choices__inner .choices__list--multiple .choices__item {
+    background-color: #f0f9ff !important;
+    border: 1px solid #bae6fd !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    margin: 4px 6px 4px 0 !important;
+    color: #0369a1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease !important;
+}
+
+.choices .choices__inner .choices__list--multiple .choices__item.is-highlighted {
+    background-color: #e0f2fe !important;
+    border-color: #7dd3fc !important;
+}
+
+/* Delete button inside tags */
+.choices .choices__inner .choices__list--multiple .choices__item .choices__button {
+    border-left: 1px solid #bae6fd !important;
+    margin-left: 10px !important;
+    padding-left: 10px !important;
+    opacity: 0.5 !important;
+    filter: none !important;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230369a1' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E") !important;
+    background-size: 11px !important;
+    background-position: center !important;
+    transition: opacity 0.2s ease !important;
+}
+
+.choices .choices__inner .choices__list--multiple .choices__item .choices__button:hover {
+    opacity: 1 !important;
+}
