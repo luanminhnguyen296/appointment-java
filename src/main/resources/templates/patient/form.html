@@ -80,7 +80,7 @@
                             <label for="dateOfBirth" class="block text-sm font-semibold text-slate-700 mb-2">Ngày sinh</label>
                             <div class="relative">
                                 <i class="ri-calendar-event-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                <input type="date" th:field="*{dateOfBirth}" id="dateOfBirth"
+                                <input type="date" value="01/01/2000" th:field="*{dateOfBirth}" id="dateOfBirth"
                                        class="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50">
                             </div>
                         </div>
@@ -98,7 +98,7 @@
                                     <span class="ml-2 text-sm text-slate-600">Nữ</span>
                                 </label>
                                 <label class="inline-flex items-center">
-                                    <input type="radio" th:field="*{gender}" value="Khác" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-brand-500">
+                                    <input type="radio" checked th:field="*{gender}" value="Khác" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-brand-500">
                                     <span class="ml-2 text-sm text-slate-600">Khác</span>
                                 </label>
                             </div>
