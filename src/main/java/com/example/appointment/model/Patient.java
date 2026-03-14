@@ -92,7 +92,7 @@ public class Patient {
 	private String address;
 	private String gender;
 
-	@Column(name = "created_at")
+	@Column(name = "created_at", updatable = false)
 	private LocalDate createdAt = LocalDate.now();
 
 }

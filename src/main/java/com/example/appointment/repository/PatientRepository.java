@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.appointment.model.Patient;
@@ -33,4 +35,11 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     // Hỗ trợ phân trang cho tìm kiếm nâng cao
     Page<Patient> findByFullNameContainingIgnoreCaseOrPhoneContainingOrEmailContainingIgnoreCase(String name,
             String phone, String email, Pageable pageable);
+
+    @Query("SELECT p FROM Patient p WHERE " +
+            "(:gender IS NULL OR p.gender = :gender OR :gender = '') AND " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(p.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "p.phone LIKE CONCAT('%', :keyword, '%') OR LOWER(p.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Patient> findAllWithFilter(@Param("keyword") String keyword, @Param("gender") String gender,
+            Pageable pageable);
 }

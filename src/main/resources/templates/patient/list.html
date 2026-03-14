@@ -164,10 +164,13 @@
                             width: "120px",
                             render: function(data, type, row) {
                                 return '<div class="flex justify-end space-x-1">' +
-                                       '<a href="/patients/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition">' +
+                                       '<a href="/patients/view/' + row.id + '" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Xem chi tiết">' +
+                                       '<i class="ri-eye-line text-lg"></i>' +
+                                       '</a>' +
+                                       '<a href="/patients/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Sửa">' +
                                        '<i class="ri-edit-2-line text-lg"></i>' +
                                        '</a>' +
-                                       '<button onclick="deletePatient(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">' +
+                                       '<button onclick="deletePatient(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">' +
                                        '<i class="ri-delete-bin-line text-lg"></i>' +
                                        '</button>' +
                                        '</div>';

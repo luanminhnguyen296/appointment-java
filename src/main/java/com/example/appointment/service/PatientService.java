@@ -59,12 +59,8 @@ public class PatientService {
                 keyword, keyword);
     }
 
-    public Page<Patient> getPatientsDatatable(String keyword, Pageable pageable) {
-        if (keyword == null || keyword.isEmpty()) {
-            return patientRepository.findAll(pageable);
-        }
-        return patientRepository.findByFullNameContainingIgnoreCaseOrPhoneContainingOrEmailContainingIgnoreCase(keyword,
-                keyword, keyword, pageable);
+    public Page<Patient> getPatientsDatatable(String keyword, String gender, Pageable pageable) {
+        return patientRepository.findAllWithFilter(keyword, gender, pageable);
     }
 
     public boolean isPhoneExists(String phone) {

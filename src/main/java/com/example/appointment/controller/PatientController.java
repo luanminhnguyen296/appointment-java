@@ -56,6 +56,13 @@ public class PatientController {
         return "redirect:/patients";
     }
 
+    @GetMapping("/patients/view/{id}")
+    public String viewPatient(@PathVariable Long id, Model model) {
+        Patient patient = patientService.getPatientById(id);
+        model.addAttribute("patient", patient);
+        return "patient/detail";
+    }
+
     @GetMapping("/api/v1/patients/list-datatable")
     @ResponseBody
     public Map<String, Object> listDatatable(
@@ -63,6 +70,7 @@ public class PatientController {
             @RequestParam(value = "start", required = false, defaultValue = "0") int start,
             @RequestParam(value = "length", required = false, defaultValue = "10") int length,
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "gender", required = false) String gender,
             @RequestParam(value = "search[value]", required = false) String searchValue) {
 
         // Ưu tiên lấy keyword từ d.keyword của client, nếu không có thì lấy từ
@@ -73,7 +81,7 @@ public class PatientController {
         int page = start / length;
         Pageable pageable = PageRequest.of(page, length, Sort.by("id").descending());
 
-        Page<Patient> patientPage = patientService.getPatientsDatatable(search, pageable);
+        Page<Patient> patientPage = patientService.getPatientsDatatable(search, gender, pageable);
         long totalRecords = patientService.getAllPatients().size(); // Hoặc thêm method count() vào service
 
         Map<String, Object> response = new HashMap<>();
