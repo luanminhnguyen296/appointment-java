@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+<head>
+    <title>Quản lý bệnh nhân | MediAdmin</title>
+    <th:block th:fragment="head_part">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+        <style>
+            .dataTables_wrapper .dataTables_filter { display: none; }
+            table.dataTable thead th { 
+                background-color: #f8fafc !important; 
+                color: #475569 !important; 
+                font-weight: 600 !important; 
+                text-transform: uppercase !important; 
+                font-size: 0.75rem !important; 
+                border-bottom: 1px solid #e2e8f0 !important;
+                padding: 12px 16px !important;
+            }
+            .dataTables_wrapper .dataTables_info { font-size: 0.875rem; color: #64748b; padding-top: 1rem; }
+            .dataTables_wrapper .dataTables_paginate { padding-top: 1rem; }
+            .avatar-square { 
+                width: 38px; height: 38px; border-radius: 8px; 
+                display: flex; align-items: center; justify-content: center;
+                background-color: #f0f9ff; font-weight: 700;
+            }
+            .badge-soft-primary { background-color: #e0f2fe; color: #0369a1; }
+            .badge-soft-pink { background-color: #fce7f3; color: #be185d; }
+            .text-muted-row { color: #94a3b8; font-size: 0.8rem; }
+        </style>
+    </th:block>
+</head>
+<body>
+    <th:block th:fragment="content_part">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Quản Lý Khách Hàng</h1>
+                <p class="text-slate-500 text-sm mt-1">Hệ thống phân trang server-side chuyên nghiệp</p>
+            </div>
+            <div class="flex space-x-3">
+                <button id="btnRefresh" class="bg-white border text-slate-600 px-4 py-2.5 rounded-lg hover:bg-slate-50 transition flex items-center shadow-sm">
+                    <i class="ri-refresh-line mr-2"></i> Làm mới
+                </button>
+                <a href="/patients/new" class="bg-brand-600 text-white px-5 py-2.5 rounded-lg hover:bg-brand-700 transition shadow-md font-medium flex items-center">
+                    <i class="ri-user-add-line mr-2"></i> Thêm bệnh nhân
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-slate-200">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                <div class="md:col-span-5">
+                    <div class="relative">
+                        <i class="ri-search-line absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="idKeyword" placeholder="Tìm kiếm theo tên, số điện thoại hoặc email..."
+                               class="w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50" autocomplete="off">
+                    </div>
+                </div>
+                <div class="md:col-span-3">
+                    <select id="idGender" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50">
+                        <option value="">Tất cả giới tính</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div class="md:col-span-4 text-right">
+                    <span id="resultsCount" class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <table id="patientTable" class="w-full text-sm"></table>
+        </div>
+    </th:block>
+
+    <!-- Lưu ý: Bỏ th:inline="javascript" để tránh lỗi ngoặc vuông kép [[ ]] của DataTable -->
+    <th:block th:fragment="script_part">
+        <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // Cấu hình DataTable
+                const table = $('#patientTable').DataTable({
+                    serverSide: true,
+                    processing: true,
+                    paging: true,
+                    pageLength: 10,
+                    // Quan trọng: Thêm khoảng trắng giữa các dấu ngoặc vuông để tránh Thymeleaf Inline Expression
+                    lengthMenu: [ [10, 25, 50, 100], [10, 25, 50, 100] ],
+                    order: [ [1, "asc"] ],
+                    dom: "<'row'<'col-sm-12'tr>>" +
+                         "<'row p-4 border-t border-slate-100'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 flex justify-end'p>>",
+                    ajax: {
+                        url: "/api/v1/patients/list-datatable",
+                        data: function (d) {
+                            d.keyword = $('#idKeyword').val();
+                            d.gender = $('#idGender').val();
+                        }
+                    },
+                    language: {
+                        processing: '<div class="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><i class="ri-loader-4-line animate-spin text-3xl text-brand-600"></i></div>',
+                        info: 'Hiển thị <b>_START_</b> đến <b>_END_</b> trong tổng số <b>_TOTAL_</b> hồ sơ',
+                        infoEmpty: 'Không tìm thấy hồ sơ nào',
+                        paginate: {
+                            next: '<i class="ri-arrow-right-s-line"></i>',
+                            previous: '<i class="ri-arrow-left-s-line"></i>'
+                        }
+                    },
+                    columns: [
+                        {
+                            title: "STT",
+                            data: null,
+                            orderable: false,
+                            width: "50px",
+                            className: "text-center text-slate-400 font-medium",
+                            render: function(data, type, row, meta) {
+                                return meta.settings._iDisplayStart + meta.row + 1;
+                            }
+                        },
+                        {
+                            title: "Bệnh nhân",
+                            data: "fullName",
+                            render: function(data, type, row) {
+                                var initials = (data && data.length > 0) ? data.charAt(0) : '?';
+                                return '<div class="flex items-center">' +
+                                       '<div class="avatar-square mr-3 text-brand-600">' + initials + '</div>' +
+                                       '<div>' +
+                                       '<div class="font-bold text-slate-800">' + data + '</div>' +
+                                       '<div class="text-muted-row mt-0.5">ID: #' + row.id + '</div>' +
+                                       '</div>' +
+                                       '</div>';
+                            }
+                        },
+                        {
+                            title: "Liên hệ",
+                            data: "phone",
+                            render: function(data, type, row) {
+                                return '<div class="flex flex-column">' +
+                                       '<div class="flex items-center text-slate-700 font-medium">' +
+                                       '<i class="ri-phone-line mr-1.5 text-slate-400 text-xs"></i>' + data +
+                                       '</div>' +
+                                       '<div class="flex items-center text-muted-row mt-1">' +
+                                       '<i class="ri-mail-line mr-1.5 text-slate-400 text-xs"></i>' + (row.email || 'N/A') +
+                                       '</div>' +
+                                       '</div>';
+                            }
+                        },
+                        {
+                            title: "Giới tính",
+                            data: "gender",
+                            width: "120px",
+                            render: function(data) {
+                                var badgeClass = 'badge-soft-primary';
+                                if (data === 'Nữ') badgeClass = 'badge-soft-pink';
+                                return '<span class="px-3 py-1 rounded-full text-xs font-bold ' + badgeClass + '">' + (data || 'N/A') + '</span>';
+                            }
+                        },
+                        {
+                            title: "Thao tác",
+                            data: null,
+                            orderable: false,
+                            className: "text-right",
+                            width: "120px",
+                            render: function(data, type, row) {
+                                return '<div class="flex justify-end space-x-1">' +
+                                       '<a href="/patients/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition">' +
+                                       '<i class="ri-edit-2-line text-lg"></i>' +
+                                       '</a>' +
+                                       '<button onclick="deletePatient(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">' +
+                                       '<i class="ri-delete-bin-line text-lg"></i>' +
+                                       '</button>' +
+                                       '</div>';
+                            }
+                        }
+                    ],
+                    drawCallback: function() {
+                        var info = this.api().page.info();
+                        $('#resultsCount').text('Tìm thấy ' + info.recordsDisplay + ' kết quả');
+                    }
+                });
+
+                $('#idKeyword').on('keyup', function() { table.draw(); });
+                $('#idGender').on('change', function() { table.draw(); });
+                $('#btnRefresh').on('click', function() {
+                    $('#idKeyword').val('');
+                    $('#idGender').val('');
+                    table.draw();
+                });
+            });
+
+            function deletePatient(id) {
+                if(confirm('Bạn có chắc chắn muốn xóa bệnh nhân này?')) {
+                    window.location.href = '/patients/delete/' + id;
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>
