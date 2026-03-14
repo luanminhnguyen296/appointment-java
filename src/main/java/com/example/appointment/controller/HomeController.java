@@ -29,4 +29,9 @@ public class HomeController {
         model.addAttribute("totalAppointments", appointmentService.getAllAppointments().size());
         return "index";
     }
+
+    @GetMapping("/about")
+    public String about() {
+        return "about";
+    }
 }

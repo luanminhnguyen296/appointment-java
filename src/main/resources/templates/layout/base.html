@@ -72,6 +72,9 @@
                 <a href="/appointments" class="nav-item">
                     <i class="ri-calendar-check-line"></i><span>Lịch hẹn</span>
                 </a>
+                <a href="/about" class="nav-item">
+                    <i class="ri-information-line"></i><span>Giới thiệu</span>
+                </a>
             </nav>
         </div>
     </aside>
@@ -91,6 +94,19 @@
         </main>
     </div>
     
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
     <th:block th:replace="${script_part} ?: ~{}"></th:block>
 </body>
 </html>
