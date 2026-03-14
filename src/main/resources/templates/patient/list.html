@@ -129,23 +129,47 @@
                         { 
                             title: "STT", 
                             data: null, 
-                            width: "60px", 
+                            width: "50px", 
                             className: "text-center text-slate-400 font-bold", 
                             render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } 
+                        },
+                        { 
+                            title: "Ảnh", 
+                            data: "imageUrl", 
+                            width: "70px",
+                            orderable: false,
+                            className: "text-center",
+                            render: function(data, type, row) {
+                                if (data && data.trim() !== '') {
+                                    return '<img src="' + data + '" class="avatar-premium object-cover border-2 border-brand-100 mx-auto shadow-sm">';
+                                } else {
+                                    var initials = (row.fullName && row.fullName.length > 0) ? row.fullName.charAt(0) : '?';
+                                    return '<div class="avatar-premium text-brand-600 mx-auto">' + initials + '</div>';
+                                }
+                            }
                         },
                         { 
                             title: "Bệnh nhân", 
                             data: "fullName", 
                             render: function(data, type, row) {
-                                var initials = (data && data.length > 0) ? data.charAt(0) : '?';
-                                return '<div class="flex items-center">' +
-                                       '<div class="avatar-premium mr-4 text-brand-600">' + initials + '</div>' +
-                                       '<div>' +
+                                return '<div>' +
                                        '<div class="font-extrabold text-slate-800 text-sm whitespace-nowrap">' + data + '</div>' +
-                                       '<div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider">ID: #' + row.id + '</div>' +
-                                       '</div>' +
+                                       '<div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Mã BN: #' + row.id + '</div>' +
                                        '</div>';
                             } 
+                        },
+                        { 
+                            title: "Bệnh lý nền", 
+                            data: "medicalCondition", 
+                            width: "200px",
+                            render: function(data) {
+                                if (Array.isArray(data) && data.length > 0) {
+                                    return '<div class="flex flex-wrap gap-1">' +
+                                           data.map(cond => '<span class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-md text-[10px] font-bold">' + cond + '</span>').join('') +
+                                           '</div>';
+                                }
+                                return '<span class="text-slate-300 text-[10px] italic">Chưa ghi nhận</span>';
+                            }
                         },
                         { 
                             title: "Liên hệ", 
@@ -164,7 +188,7 @@
                         { 
                             title: "Giới tính", 
                             data: "gender", 
-                            width: "120px", 
+                            width: "100px", 
                             className: "text-center",
                             render: function(data) {
                                 var badgeClass = data === 'Nữ' ? 'bg-pink-50 text-pink-600' : (data === 'Nam' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-600');

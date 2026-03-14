@@ -27,7 +27,8 @@ public class PatientService {
 
     public Patient savePatient(Patient patient) {
         // Kiểm tra logic nghiệp vụ (ví dụ: số điện thoại không được trùng)
-        if (patient.getId() == null && patientRepository.existsByPhone(patient.getPhone())) {
+        boolean isNew = patient.getId() == null || !patientRepository.existsById(patient.getId());
+        if (isNew && patientRepository.existsByPhone(patient.getPhone())) {
             throw new RuntimeException("Số điện thoại này đã được đăng ký!");
         }
         return patientRepository.save(patient);
@@ -41,6 +42,8 @@ public class PatientService {
         patient.setDateOfBirth(patientDetails.getDateOfBirth());
         patient.setAddress(patientDetails.getAddress());
         patient.setGender(patientDetails.getGender());
+        patient.setImageUrl(patientDetails.getImageUrl());
+        patient.setMedicalCondition(patientDetails.getMedicalCondition());
         return patientRepository.save(patient);
     }
 

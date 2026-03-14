@@ -81,6 +81,10 @@
     border-radius: 8px !important;
 }
 
+.choices__input{
+    background-color: transparent !important;
+}
+
 .choices__list--dropdown .choices__item--selectable.is-highlighted {
     background-color: var(--choices-highlight) !important;
     color: var(--choices-primary) !important;

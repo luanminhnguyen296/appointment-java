@@ -1,6 +1,8 @@
 package com.example.appointment.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +18,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.appointment.model.Patient;
+import com.example.appointment.service.FileService;
 import com.example.appointment.service.PatientService;
+import com.example.appointment.utils.SnowflakeIdGenerator;
 
 @Controller
 public class PatientController {
 
     @Autowired
     private PatientService patientService;
+
+    @Autowired
+    private FileService fileService;
 
     @GetMapping("/patients")
     public String listPatients() {
@@ -41,16 +49,64 @@ public class PatientController {
     }
 
     @PostMapping("/patients/save")
-    public String savePatient(@ModelAttribute Patient patient) {
-        patientService.savePatient(patient);
+    public String savePatient(@ModelAttribute Patient patient,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+        try {
+            // 0. Generate Snowflake ID for new patients
+            if (patient.getId() == null) {
+                patient.setId(SnowflakeIdGenerator.nextId());
+            }
+
+            // 1. Xử lý Ảnh đại diện
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String imageUrl = fileService.saveFile(imageFile);
+                patient.setImageUrl(imageUrl);
+            } else if (patient.getId() != null) {
+                // Nếu không tải ảnh mới, giữ lại ảnh cũ từ form hoặc DB
+                if (patient.getImageUrl() == null || patient.getImageUrl().isEmpty()) {
+                    Patient existing = patientService.getPatientById(patient.getId());
+                    if (existing != null) {
+                        patient.setImageUrl(existing.getImageUrl());
+                    }
+                }
+            }
+
+            // 2. Xử lý Bệnh lý nền (Fix lỗi Choices.js gửi mảng gộp chuỗi)
+            List<String> rawConditions = patient.getMedicalCondition();
+            if (rawConditions != null && !rawConditions.isEmpty()) {
+                List<String> cleanedList = new ArrayList<>();
+                for (String cond : rawConditions) {
+                    if (cond != null && cond.contains(",")) {
+                        String[] parts = cond.split(",");
+                        for (String p : parts) {
+                            String trimmed = p.trim();
+                            if (!trimmed.isEmpty())
+                                cleanedList.add(trimmed);
+                        }
+                    } else if (cond != null && !cond.trim().isEmpty()) {
+                        cleanedList.add(cond.trim());
+                    }
+                }
+                patient.setMedicalCondition(cleanedList);
+            }
+
+            patientService.savePatient(patient);
+        } catch (Exception e) {
+            System.err.println("Error saving patient: " + e.getMessage());
+            e.printStackTrace();
+        }
         return "redirect:/patients";
     }
 
     @GetMapping("/patients/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
-        Patient patient = patientService.getPatientById(id);
-        model.addAttribute("patient", patient);
-        return "patient/form";
+        try {
+            Patient patient = patientService.getPatientById(id);
+            model.addAttribute("patient", patient);
+            return "patient/form";
+        } catch (Exception e) {
+            return "redirect:/patients";
+        }
     }
 
     @GetMapping("/patients/delete/{id}")
@@ -76,20 +132,14 @@ public class PatientController {
             @RequestParam(value = "gender", required = false) String gender,
             @RequestParam(value = "search[value]", required = false) String searchValue) {
 
-        // Ưu tiên lấy keyword từ d.keyword của client, nếu không có thì lấy từ
-        // search[value] mặc định của DataTable
         String search = (keyword != null && !keyword.isEmpty()) ? keyword : searchValue;
-
-        // Tính toán trang
         int page = start / length;
         Pageable pageable = PageRequest.of(page, length, Sort.by("id").descending());
 
         Page<Patient> patientPage = patientService.getPatientsDatatable(search, gender, pageable);
-        long totalRecords = patientService.getAllPatients().size(); // Hoặc thêm method count() vào service
-
         Map<String, Object> response = new HashMap<>();
         response.put("draw", draw);
-        response.put("recordsTotal", totalRecords);
+        response.put("recordsTotal", patientService.getAllPatients().size());
         response.put("recordsFiltered", patientPage.getTotalElements());
         response.put("data", patientPage.getContent());
 
