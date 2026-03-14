@@ -33,7 +33,10 @@ public class PatientController {
 
     @GetMapping("/patients/new")
     public String showNewForm(Model model) {
-        model.addAttribute("patient", new Patient());
+        Patient patient = new Patient();
+        patient.setGender("Khác");
+        patient.setDateOfBirth(java.time.LocalDate.of(2000, 1, 1));
+        model.addAttribute("patient", patient);
         return "patient/form";
     }
 

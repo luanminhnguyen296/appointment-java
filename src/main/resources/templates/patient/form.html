@@ -2,126 +2,82 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
 <head>
-    <title th:text="${patient.id == null ? 'Thêm bệnh nhân mới' : 'Cập nhật thông tin bệnh nhân'} + ' | MediAdmin'"></title>
+    <title th:text="${patient.id == null ? 'Thêm mới' : 'Cập nhật'} + ' | MediAdmin'"></title>
     <th:block th:fragment="head_part">
-        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+        <style>
+            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 2.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+            input[type="radio"]:checked + span { color: #0284c7; font-weight: 800; }
+        </style>
     </th:block>
 </head>
 <body>
     <th:block th:fragment="content_part">
         <div class="max-w-4xl mx-auto">
-            <nav class="flex mb-6 text-sm text-slate-500" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                    <li class="inline-flex items-center">
-                        <a href="/patients" class="hover:text-brand-600 flex items-center">
-                            <i class="ri-group-line mr-2"></i> Khách hàng
-                        </a>
-                    </li>
-                    <li>
-                        <div class="flex items-center">
-                            <i class="ri-arrow-right-s-line text-slate-400 mx-2"></i>
-                            <span class="font-medium text-slate-800" th:text="${patient.id == null ? 'Thêm mới' : 'Cập nhật'}"></span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
+            <div class="mb-10">
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight" th:text="${patient.id == null ? 'Bệnh Nhân Mới' : 'Sửa Hồ Sơ'}"></h1>
+                <p class="text-slate-400 font-medium text-sm mt-1">Quản lý và cập nhật thông tin y tế kịp thời.</p>
+            </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-8 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-800" th:text="${patient.id == null ? 'Thêm Bệnh Nhân Mới' : 'Cập Nhật Thông Tin'}"></h1>
-                        <p class="text-slate-500 text-sm mt-1">Vui lòng điền đầy đủ các thông tin bắt buộc (*)</p>
-                    </div>
-                    <div class="h-12 w-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
-                        <i class="ri-user-add-line text-2xl" th:if="${patient.id == null}"></i>
-                        <i class="ri-edit-line text-2xl" th:if="${patient.id != null}"></i>
-                    </div>
-                </div>
-
-                <form th:action="@{/patients/save}" th:object="${patient}" method="POST" class="p-8">
+            <div class="premium-card">
+                <form th:action="@{/patients/save}" th:object="${patient}" method="POST" class="space-y-8">
                     <input type="hidden" th:field="*{id}" />
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Họ và tên -->
                         <div class="md:col-span-2">
-                            <label for="fullName" class="block text-sm font-semibold text-slate-700 mb-2">Họ và tên bệnh nhân <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <i class="ri-user-smile-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" th:field="*{fullName}" id="fullName" required
-                                       class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50"
-                                       placeholder="Ví dụ: Nguyễn Văn A">
-                            </div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Họ và tên <span class="text-rose-500">*</span></label>
+                            <input type="text" th:field="*{fullName}" required placeholder="Họ và tên bệnh nhân"
+                                   class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all">
                         </div>
 
-                        <!-- Số điện thoại -->
                         <div>
-                            <label for="phone" class="block text-sm font-semibold text-slate-700 mb-2">Số điện thoại <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <i class="ri-phone-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="tel" th:field="*{phone}" id="phone" required
-                                       class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50"
-                                       placeholder="Số điện thoại liên lạc">
-                            </div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Số điện thoại <span class="text-rose-500">*</span></label>
+                            <input type="tel" th:field="*{phone}" required placeholder="Số điện thoại"
+                                   class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all">
                         </div>
 
-                        <!-- Email -->
                         <div>
-                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">Địa chỉ Email</label>
-                            <div class="relative">
-                                <i class="ri-mail-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="email" th:field="*{email}" id="email"
-                                       class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50"
-                                       placeholder="example@gmail.com">
-                            </div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email</label>
+                            <input type="email" th:field="*{email}" placeholder="Email@example.com"
+                                   class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all">
                         </div>
 
-                        <!-- Ngày sinh -->
                         <div>
-                            <label for="dateOfBirth" class="block text-sm font-semibold text-slate-700 mb-2">Ngày sinh</label>
-                            <div class="relative">
-                                <i class="ri-calendar-event-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                                <input type="date" value="01/01/2000" th:field="*{dateOfBirth}" id="dateOfBirth"
-                                       class="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50">
-                            </div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ngày sinh</label>
+                            <input type="date" th:field="*{dateOfBirth}"
+                                   class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all">
                         </div>
 
-                        <!-- Giới tính -->
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Giới tính</label>
-                            <div class="flex space-x-6 py-3">
-                                <label class="inline-flex items-center">
-                                    <input type="radio" th:field="*{gender}" value="Nam" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-brand-500">
-                                    <span class="ml-2 text-sm text-slate-600">Nam</span>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Giới tính</label>
+                            <div class="flex space-x-8 py-3 px-2">
+                                <label class="inline-flex items-center cursor-pointer group">
+                                    <input type="radio" th:field="*{gender}" value="Nam" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                                    <span class="ml-2 text-sm font-bold text-slate-500 group-hover:text-slate-800">Nam</span>
                                 </label>
-                                <label class="inline-flex items-center">
-                                    <input type="radio" th:field="*{gender}" value="Nữ" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-brand-500">
-                                    <span class="ml-2 text-sm text-slate-600">Nữ</span>
+                                <label class="inline-flex items-center cursor-pointer group">
+                                    <input type="radio" th:field="*{gender}" value="Nữ" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                                    <span class="ml-2 text-sm font-bold text-slate-500 group-hover:text-slate-800">Nữ</span>
                                 </label>
-                                <label class="inline-flex items-center">
-                                    <input type="radio" checked th:field="*{gender}" value="Khác" class="w-4 h-4 text-brand-600 bg-gray-100 border-gray-300 focus:ring-brand-500">
-                                    <span class="ml-2 text-sm text-slate-600">Khác</span>
+                                <label class="inline-flex items-center cursor-pointer group">
+                                    <input type="radio" th:field="*{gender}" value="Khác" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                                    <span class="ml-2 text-sm font-bold text-slate-500 group-hover:text-slate-800">Khác</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Địa chỉ -->
                         <div class="md:col-span-2">
-                            <label for="address" class="block text-sm font-semibold text-slate-700 mb-2">Địa chỉ hiện tại</label>
-                            <div class="relative">
-                                <i class="ri-map-pin-line absolute left-4 top-4 text-slate-400"></i>
-                                <textarea th:field="*{address}" id="address" rows="3"
-                                          class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 transition outline-none bg-slate-50/50"
-                                          placeholder="Nhập địa chỉ chi tiết..."></textarea>
-                            </div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Địa chỉ</label>
+                            <textarea th:field="*{address}" rows="3" placeholder="Nhập địa chỉ bệnh nhân..."
+                                      class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all"></textarea>
                         </div>
                     </div>
 
-                    <div class="mt-10 pt-8 border-t border-slate-100 flex justify-end space-x-4">
-                        <a href="/patients" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition font-medium">
-                            Hủy bỏ
+                    <div class="pt-10 flex justify-end space-x-4">
+                        <a href="/patients" class="px-8 py-4 rounded-2xl text-slate-500 font-bold hover:bg-slate-50 transition border border-transparent">
+                            Hủy
                         </a>
-                        <button type="submit" class="px-8 py-3 rounded-xl bg-brand-600 text-white hover:bg-brand-700 shadow-md shadow-brand-200 transition font-bold flex items-center">
-                            Lưu thông tin <i class="ri-save-3-line ml-2"></i>
+                        <button type="submit" class="px-10 py-4 bg-brand-600 text-white font-black rounded-2xl hover:bg-brand-700 shadow-xl shadow-brand-500/20 transition-all uppercase text-xs tracking-widest">
+                            Lưu thông tin <i class="ri-check-line ml-1"></i>
                         </button>
                     </div>
                 </form>

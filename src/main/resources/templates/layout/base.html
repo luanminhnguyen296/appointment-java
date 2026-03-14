@@ -1,30 +1,26 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content, extra_head, extra_scripts)">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content_part, head_part, script_part)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:insert="${title} ?: _">MediAdmin</title>
+    <title th:replace="${title}">MediAdmin</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <script th:inline="none">
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { 
-                        sans: [ 'Plus Jakarta Sans', 'Inter', 'sans-serif' ] 
-                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
                     colors: { 
-                        brand: { 
-                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 
-                            300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 
-                            600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e',
-                        } 
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e' } 
                     }
                 }
             }
@@ -41,24 +37,30 @@
         .nav-item i { font-size: 1.25rem; margin-right: 0.75rem; }
         .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: #f8fafc; }
         .nav-item.active { background: #0284c7; color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
-        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+        .glass-header { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(10px); }
+        
+        .choices__inner {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 1rem !important;
+            padding: 0.5rem 1rem !important;
+            min-height: 52px !important;
+        }
+        .choices.is-focused .choices__inner { border-color: #0ea5e9 !important; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1) !important; }
     </style>
-    <th:block th:insert="${extra_head} ?: ~{}"></th:block>
+    <th:block th:replace="${head_part} ?: ~{}"></th:block>
 </head>
 <body class="bg-slate-50 text-slate-900" x-data="{ sidebarOpen: true }">
-    <!-- Sidebar -->
     <aside class="fixed inset-y-0 left-0 sidebar-gradient w-72 transform transition-all duration-300 z-40 shadow-2xl" 
            x-bind:class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
         <div class="px-8 py-8 flex items-center mb-4">
             <div class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white shadow-lg mr-3">
                 <i class="ri-hospital-fill text-2xl"></i>
             </div>
-            <div>
-                <h1 class="text-white font-extrabold text-xl tracking-tight">MediHub</h1>
-            </div>
+            <h1 class="text-white font-extrabold text-xl tracking-tight">MediHub</h1>
         </div>
 
-        <div class="px-6 mb-4">
+        <div class="px-6">
             <nav class="space-y-1">
                 <a href="/" class="nav-item">
                     <i class="ri-dashboard-2-line"></i><span>Tổng quan</span>
@@ -79,23 +81,15 @@
                 <button x-on:click="sidebarOpen = !sidebarOpen" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400">
                     <i class="ri-menu-2-line text-lg"></i>
                 </button>
-                <h2 class="text-sm font-bold text-slate-800">Hệ thống Quản lý MediHub</h2>
+                <h2 class="text-sm font-bold text-slate-800">MediHub Pro</h2>
             </div>
         </header>
 
         <main class="p-10 min-h-screen">
-            <th:block th:insert="${content} ?: ~{}"></th:block>
+            <th:block th:replace="${content_part} ?: ~{}"></th:block>
         </main>
-
-        <footer class="p-10 border-t border-slate-200 text-slate-400 text-xs font-medium flex justify-between items-center bg-white">
-            <div>© 2024 <span class="font-bold text-brand-600">MediHub</span></div>
-            <div class="flex space-x-6 font-black uppercase">
-                <span>Võ Kim Phi - 24002311</span>
-                <span>Nguyễn Minh Luân - 24002300</span>
-            </div>
-        </footer>
     </div>
     
-    <th:block th:insert="${extra_scripts} ?: ~{}"></th:block>
+    <th:block th:replace="${script_part} ?: ~{}"></th:block>
 </body>
 </html>
