@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+<head>
+    <title>Lịch hẹn | MediAdmin</title>
+    <th:block th:fragment="head_part">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+        <style>
+            .dataTables_wrapper .dataTables_filter { display: none; }
+            table.dataTable thead th { 
+                background: #f8fafc !important; color: #64748b !important; 
+                font-weight: 800 !important; text-transform: uppercase !important; 
+                font-size: 11px !important; border-bottom: 1px solid #f1f5f9 !important;
+                padding: 16px 24px !important;
+                white-space: nowrap;
+            }
+            table.dataTable tbody td { 
+                padding: 16px 24px !important; 
+                border-bottom: 1px solid #f1f5f9 !important;
+                vertical-align: middle;
+            }
+            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+            @media (min-width: 768px) {
+                .premium-card { padding: 2rem; }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <th:block th:fragment="content_part">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Lịch Hẹn Khám</h1>
+                <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Điều phối lịch trình khám và điều trị MediHub.</p>
+            </div>
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto">
+                <button id="btnRefresh" class="flex-1 lg:flex-none bg-white border border-slate-200 text-slate-600 px-5 py-3 rounded-xl hover:bg-slate-50 transition shadow-sm font-bold text-sm flex items-center justify-center">
+                    <i class="ri-refresh-line mr-2"></i> Làm mới
+                </button>
+                <a href="/appointments/new" class="flex-1 lg:flex-none bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition shadow-lg font-extrabold text-sm flex items-center justify-center">
+                    <i class="ri-calendar-event-line mr-2"></i> Tạo lịch hẹn
+                </a>
+            </div>
+        </div>
+
+        <div class="premium-card mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-center">
+                <div class="lg:col-span-9">
+                    <div class="relative transition-all bg-slate-50 border border-transparent rounded-2xl overflow-hidden px-5 py-0.5 focus-within:bg-white focus-within:border-brand-300 focus-within:ring-4 focus-within:ring-brand-500/10">
+                        <i class="ri-search-2-line absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="idKeyword" placeholder="Tìm tên bệnh nhân hoặc bác sĩ..."
+                               class="w-full pl-8 pr-2 py-4 bg-transparent outline-none font-medium text-sm" autocomplete="off">
+                    </div>
+                </div>
+                <div class="lg:col-span-3 text-left lg:text-right">
+                    <span id="resultsCount" class="inline-block text-[10px] font-black text-brand-600 bg-brand-50 px-4 py-2 rounded-full uppercase tracking-widest">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="table-responsive overflow-x-auto px-1">
+                <table id="appointmentTable" class="w-full text-sm min-w-[900px]"></table>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="script_part">
+        <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <script th:inline="none">
+            $(document).ready(function() {
+                const table = $('#appointmentTable').DataTable({
+                    serverSide: true,
+                    processing: true,
+                    paging: true,
+                    pageLength: 10,
+                    lengthMenu: [ [ 10, 25, 50 ], [ 10, 25, 50 ] ],
+                    order: [ [ 1, "desc" ] ],
+                    dom: "<'row'<'col-sm-12'tr>>" +
+                         "<'row p-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 flex justify-end'p>>",
+                    ajax: {
+                        url: "/api/v1/appointments/list-datatable",
+                        data: function (d) {
+                            d.keyword = $('#idKeyword').val();
+                        }
+                    },
+                    language: {
+                        processing: 'Đang xử lý...',
+                        info: 'Hiển thị <b>_START_</b> đến <b>_END_</b> / <b>_TOTAL_</b>',
+                        paginate: { next: '<i class="ri-arrow-right-s-line"></i>', previous: '<i class="ri-arrow-left-s-line"></i>' }
+                    },
+                    columns: [
+                        { title: "ID", data: "id", width: "50px", className: "text-center text-slate-400 font-bold" },
+                        { title: "Bệnh nhân", data: "patient.fullName", render: function(data) {
+                                return '<div class="font-extrabold text-slate-800">' + data + '</div>';
+                        } },
+                        { title: "Bác sĩ", data: "doctor.name", render: function(data, type, row) {
+                                return '<div class="text-brand-600 font-extrabold">' + data + '</div><div class="text-[10px] text-slate-400 uppercase font-black tracking-widest">' + row.doctor.specialty + '</div>';
+                        } },
+                        { title: "Lịch hẹn", data: "appointmentDate", render: function(data, type, row) {
+                                return '<div class="flex flex-col gap-0.5"><div><i class="ri-calendar-line mr-1 text-slate-400 text-xs"></i><span class="font-bold text-slate-700">' + data + '</span></div><div class="text-[11px] text-slate-400"><i class="ri-history-line mr-1 text-slate-400 text-xs"></i>' + row.appointmentTime + '</div></div>';
+                        } },
+                        { title: "Trạng thái", data: "status", render: function(data) {
+                                var badgeClass = 'bg-slate-50 text-slate-600';
+                                if(data === 'CONFIRMED') badgeClass = 'bg-emerald-50 text-emerald-600';
+                                if(data === 'PENDING') badgeClass = 'bg-amber-50 text-amber-600';
+                                if(data === 'CANCELLED') badgeClass = 'bg-rose-50 text-rose-600';
+                                return '<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ' + badgeClass + '">' + data + '</span>';
+                        } },
+                        { title: "Thao tác", data: null, orderable: false, className: "text-right", render: function(data, type, row) {
+                                return '<div class="flex justify-end space-x-1"><a href="/appointments/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"><i class="ri-edit-2-line text-lg"></i></a><button onclick="deleteAppointment(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><i class="ri-delete-bin-line text-lg"></i></button></div>';
+                        } }
+                    ],
+                    drawCallback: function() { $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' lịch hẹn'); }
+                });
+
+                $('#idKeyword').on('keyup', function() { table.draw(); });
+                $('#btnRefresh').on('click', function() { $('#idKeyword').val(''); table.draw(); });
+            });
+            function deleteAppointment(id) { if(confirm('Bạn có chắc chắn muốn xóa lịch hẹn này?')) { window.location.href = '/appointments/delete/' + id; } }
+        </script>
+    </th:block>
+</body>
+</html>

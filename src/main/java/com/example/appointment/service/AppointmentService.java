@@ -1,49 +1,38 @@
 package com.example.appointment.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.appointment.model.Appointment;
+import com.example.appointment.repository.AppointmentRepository;
 
 @Service
 public class AppointmentService {
 
-    private List<Appointment> appointments = new ArrayList<>();
-    private AtomicLong counter = new AtomicLong();
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
-    public List<Appointment> getAll(){
-        return appointments;
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
     }
 
-    public void add(Appointment a){
-        a.setId(counter.incrementAndGet());
-        appointments.add(a);
+    public Appointment getAppointmentById(Long id) {
+        return appointmentRepository.findById(id).orElse(null);
     }
 
-    public Appointment getById(Long id){
-        return appointments.stream().filter(a->a.getId().equals(id)).findFirst().orElse(null);
+    public void saveAppointment(Appointment appointment) {
+        appointmentRepository.save(appointment);
     }
 
-    public void update(Appointment updated){
-
-        Appointment a = getById(updated.getId());
-
-        if(a!=null){
-            a.setDoctorId(updated.getDoctorId());
-            a.setDoctorName(updated.getDoctorName());
-            a.setPatientName(updated.getPatientName());
-            a.setAge(updated.getAge());
-            a.setPhone(updated.getPhone());
-            a.setDate(updated.getDate());
-            a.setTime(updated.getTime());
-            a.setNote(updated.getNote());
-        }
+    public void deleteAppointment(Long id) {
+        appointmentRepository.deleteById(id);
     }
 
-    public void delete(Long id){
-        appointments.removeIf(a->a.getId().equals(id));
+    public Page<Appointment> getAppointmentsDatatable(String keyword, Pageable pageable) {
+        return appointmentRepository.findByKeyword(keyword, pageable);
     }
 }

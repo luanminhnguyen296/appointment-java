@@ -1,29 +1,38 @@
-
 package com.example.appointment.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.appointment.model.Doctor;
+import com.example.appointment.repository.DoctorRepository;
 
 @Service
 public class DoctorService {
 
-    private List<Doctor> doctors = new ArrayList<>();
+    @Autowired
+    private DoctorRepository doctorRepository;
 
-    public DoctorService(){
-        doctors.add(new Doctor(1L,"Dr. Smith","Cardiology","Heart specialist"));
-        doctors.add(new Doctor(2L,"Dr. Anna","Dermatology","Skin specialist"));
-        doctors.add(new Doctor(3L,"Dr. John","Neurology","Brain specialist"));
+    public List<Doctor> getAllDoctors() {
+        return doctorRepository.findAll();
     }
 
-    public List<Doctor> getAllDoctors(){
-        return doctors;
+    public Doctor getDoctorById(Long id) {
+        return doctorRepository.findById(id).orElse(null);
     }
 
-    public Doctor getDoctorById(Long id){
-        return doctors.stream().filter(d->d.getId().equals(id)).findFirst().orElse(null);
+    public void saveDoctor(Doctor doctor) {
+        doctorRepository.save(doctor);
+    }
+
+    public void deleteDoctor(Long id) {
+        doctorRepository.deleteById(id);
+    }
+
+    public Page<Doctor> getDoctorsDatatable(String keyword, Pageable pageable) {
+        return doctorRepository.findByKeyword(keyword, pageable);
     }
 }

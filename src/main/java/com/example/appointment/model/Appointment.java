@@ -1,42 +1,114 @@
-
 package com.example.appointment.model;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "appointments")
 public class Appointment {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long doctorId;
-    private String doctorName;
-    private String patientName;
-    private int age;
-    private String phone;
-    private String date;
-    private String time;
-    private String note;
 
-    public Long getId(){return id;}
-    public void setId(Long id){this.id=id;}
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
-    public Long getDoctorId(){return doctorId;}
-    public void setDoctorId(Long doctorId){this.doctorId=doctorId;}
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
 
-    public String getDoctorName(){return doctorName;}
-    public void setDoctorName(String doctorName){this.doctorName=doctorName;}
+    @Column(nullable = false)
+    private LocalDate appointmentDate;
 
-    public String getPatientName(){return patientName;}
-    public void setPatientName(String patientName){this.patientName=patientName;}
+    @Column(nullable = false)
+    private LocalTime appointmentTime;
 
-    public int getAge(){return age;}
-    public void setAge(int age){this.age=age;}
+    private String reason;
 
-    public String getPhone(){return phone;}
-    public void setPhone(String phone){this.phone=phone;}
+    @Column(nullable = false)
+    private String status = "PENDING"; // PENDING, CONFIRMED, COMPLETED, CANCELLED
 
-    public String getDate(){return date;}
-    public void setDate(String date){this.date=date;}
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public String getTime(){return time;}
-    public void setTime(String time){this.time=time;}
+    // Default constructor
+    public Appointment() {
+    }
 
-    public String getNote(){return note;}
-    public void setNote(String note){this.note=note;}
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
+    }
+
+    public LocalDate getAppointmentDate() {
+        return appointmentDate;
+    }
+
+    public void setAppointmentDate(LocalDate appointmentDate) {
+        this.appointmentDate = appointmentDate;
+    }
+
+    public LocalTime getAppointmentTime() {
+        return appointmentTime;
+    }
+
+    public void setAppointmentTime(LocalTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
