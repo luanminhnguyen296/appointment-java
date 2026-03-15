@@ -12,15 +12,25 @@ import com.example.appointment.model.Doctor;
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
-    @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.hospitals h WHERE " +
-            "(:keyword IS NULL OR :keyword = '' OR LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.specialty.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND "
-            +
-            "(:specialtyId IS NULL OR d.specialty.id = :specialtyId) AND " +
-            "(:hospitalId IS NULL OR h.id = :hospitalId) AND " +
-            "(:gender IS NULL OR :gender = '' OR d.gender = :gender)")
-    Page<Doctor> findWithFilters(@Param("keyword") String keyword,
-            @Param("specialtyId") Long specialtyId,
-            @Param("hospitalId") Long hospitalId,
-            @Param("gender") String gender,
-            Pageable pageable);
+        @Query(value = "SELECT DISTINCT d FROM Doctor d " +
+                        "LEFT JOIN d.specialty s " +
+                        "LEFT JOIN d.hospitals h WHERE " +
+                        "(:keyword IS NULL OR :keyword = '' OR LOWER(d.name) LIKE LOWER(:keyword) OR (s IS NOT NULL AND LOWER(s.name) LIKE LOWER(:keyword))) AND "
+                        +
+                        "(:specialtyId IS NULL OR s.id = :specialtyId) AND " +
+                        "(:hospitalId IS NULL OR h.id = :hospitalId) AND " +
+                        "(:gender IS NULL OR :gender = '' OR d.gender = :gender)", countQuery = "SELECT COUNT(DISTINCT d) FROM Doctor d "
+                                        +
+                                        "LEFT JOIN d.specialty s " +
+                                        "LEFT JOIN d.hospitals h WHERE " +
+                                        "(:keyword IS NULL OR :keyword = '' OR LOWER(d.name) LIKE LOWER(:keyword) OR (s IS NOT NULL AND LOWER(s.name) LIKE LOWER(:keyword))) AND "
+                                        +
+                                        "(:specialtyId IS NULL OR s.id = :specialtyId) AND " +
+                                        "(:hospitalId IS NULL OR h.id = :hospitalId) AND " +
+                                        "(:gender IS NULL OR :gender = '' OR d.gender = :gender)")
+        Page<Doctor> findWithFilters(@Param("keyword") String keyword,
+                        @Param("specialtyId") Long specialtyId,
+                        @Param("hospitalId") Long hospitalId,
+                        @Param("gender") String gender,
+                        Pageable pageable);
 }

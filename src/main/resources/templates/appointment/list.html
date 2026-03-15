@@ -1,123 +1,407 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, null)}">
 <head>
-    <title>Lịch hẹn | MediAdmin</title>
+    <title>Lịch Công Tác | MediAdmin</title>
     <th:block th:fragment="head_part">
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
         <style>
-            .dataTables_wrapper .dataTables_filter { display: none; }
-            table.dataTable thead th { 
-                background: #f8fafc !important; color: #64748b !important; 
-                font-weight: 800 !important; text-transform: uppercase !important; 
-                font-size: 11px !important; border-bottom: 1px solid #f1f5f9 !important;
-                padding: 16px 24px !important;
-                white-space: nowrap;
-            }
-            table.dataTable tbody td { 
-                padding: 16px 24px !important; 
-                border-bottom: 1px solid #f1f5f9 !important;
-                vertical-align: middle;
-            }
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-            @media (min-width: 768px) {
-                .premium-card { padding: 2rem; }
+            .calendar-container { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+            .calendar-wrapper { overflow-x: auto; border-radius: 2rem; }
+            .fc { font-family: 'Inter', sans-serif; --fc-border-color: #f1f5f9; --fc-today-bg-color: #f8fafc; min-width: 800px; }
+            .fc-header-toolbar { padding: 1.5rem !important; margin-bottom: 0 !important; background: #fff; border-bottom: 1px solid #f1f5f9; }
+            .fc-toolbar-title { font-size: 1.25rem !important; font-weight: 800 !important; color: #1e293b; color: #0f172a; }
+            .fc-button { padding: 0.6rem 1.2rem !important; font-weight: 700 !important; font-size: 0.8rem !important; border-radius: 0.75rem !important; text-transform: capitalize !important; transition: all 0.2s !important; border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+            .fc-button-primary { background-color: #fff !important; color: #64748b !important; }
+            .fc-button-primary:hover { background-color: #f8fafc !important; color: #0284c7 !important; border-color: #bae6fd !important; }
+            .fc-button-active { background-color: #f0f9ff !important; color: #0284c7 !important; border-color: #bae6fd !important; }
+            .fc-day-today { background-color: rgba(2, 132, 199, 0.02) !important; }
+            .fc-col-header-cell { padding: 1rem 0 !important; background: #fff; }
+            .fc-col-header-cell-cushion { color: #64748b; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+            .fc-timegrid-slot { height: 4rem !important; border-bottom: 1px solid #f8fafc !important; }
+            .fc-timegrid-slot-label-cushion { color: #94a3b8; font-size: 0.7rem; font-weight: 700; }
+            
+            .fc-v-event { border-radius: 1rem !important; border: none !important; padding: 4px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .event-content { padding: 6px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+            .event-time-badge { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.3); color: inherit; align-self: flex-start; margin-bottom: 4px; }
+            .event-title { font-size: 11px; font-weight: 800; line-height: 1.3; }
+            .event-avatars { display: flex; align-items: center; margin-top: 6px; gap: -4px; }
+            .event-avatar { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid white; object-fit: cover; }
+            
+            .filter-sidebar { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; height: fit-content; }
+            .choices__inner { border-radius: 0.75rem !important; min-height: 48px !important; background-color: #f8fafc !important; border: 1px solid #f1f5f9 !important; font-size: 0.875rem !important; font-weight: 600 !important; }
+            .choices__list--dropdown { border-radius: 1rem !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; }
+            .choices-avatar { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; margin-right: 10px; }
+            
+            #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+
+            /* Responsive Calendar Fixes */
+            @media (max-width: 768px) {
+                .fc-header-toolbar { flex-direction: column; gap: 1rem; align-items: stretch !important; padding: 1rem !important; }
+                .fc-toolbar-title { font-size: 1rem !important; text-align: center; }
+                .fc-toolbar-chunk { display: flex; justify-content: center; gap: 0.5rem; }
+                .fc-button { padding: 0.4rem 0.8rem !important; font-size: 0.7rem !important; }
+                .fc-timegrid-slot { height: 3rem !important; }
+                .premium-card { padding: 1rem; }
+                .calendar-container { border-radius: 1.5rem; }
             }
         </style>
     </th:block>
 </head>
 <body>
+    <th:block th:fragment="breadcrumb_part">
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <span class="text-slate-600">Lịch hẹn</span>
+    </th:block>
+
     <th:block th:fragment="content_part">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Lịch Hẹn Khám</h1>
-                <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Điều phối lịch trình khám và điều trị MediHub.</p>
+        <div id="loading-overlay">
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                <p class="mt-4 font-bold text-slate-600">Đang cập nhật lịch...</p>
             </div>
-            <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                <button id="btnRefresh" class="flex-1 lg:flex-none bg-white border border-slate-200 text-slate-600 px-5 py-3 rounded-xl hover:bg-slate-50 transition shadow-sm font-bold text-sm flex items-center justify-center">
-                    <i class="ri-refresh-line mr-2"></i> Làm mới
-                </button>
-                <a href="/appointments/new" class="flex-1 lg:flex-none bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition shadow-lg font-extrabold text-sm flex items-center justify-center">
-                    <i class="ri-calendar-event-line mr-2"></i> Tạo lịch hẹn
+        </div>
+
+        <div class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Lịch Công Tác</h1>
+                <p class="text-slate-400 font-medium text-sm mt-1">Quản lý và điều phối thời gian khám bệnh thông minh.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="/appointments/new" class="bg-brand-600 text-white px-6 py-3.5 rounded-2xl hover:bg-brand-700 transition shadow-xl shadow-brand-500/20 font-black text-xs uppercase tracking-widest flex items-center">
+                    <i class="ri-add-line mr-2 text-lg"></i> Đặt lịch mới
                 </a>
             </div>
         </div>
 
-        <div class="premium-card mb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-center">
-                <div class="lg:col-span-9">
-                    <div class="relative transition-all bg-slate-50 border border-transparent rounded-2xl overflow-hidden px-5 py-0.5 focus-within:bg-white focus-within:border-brand-300 focus-within:ring-4 focus-within:ring-brand-500/10">
-                        <i class="ri-search-2-line absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="idKeyword" placeholder="Tìm tên bệnh nhân hoặc bác sĩ..."
-                               class="w-full pl-8 pr-2 py-4 bg-transparent outline-none font-medium text-sm" autocomplete="off">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Filters -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="filter-sidebar">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center">
+                        <i class="ri-filter-3-line mr-2 text-brand-500"></i> Bộ lọc lịch hẹn
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Chuyên khoa</label>
+                            <select id="filterSpecialty" class="w-full">
+                                <option value="">Tất cả chuyên khoa</option>
+                                <option th:each="s : ${specialties}" th:value="${s.id}" 
+                                        th:attr="data-avatar=${s.imageUrl != null ? s.imageUrl : 'https://ui-avatars.com/api/?name=' + #uris.escapeModelAttr(s.name) + '&background=f8fafc&color=64748b&bold=true'}"
+                                        th:text="${s.name}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Bác sĩ</label>
+                            <select id="filterDoctor" class="w-full">
+                                <option value="">Tất cả bác sĩ</option>
+                                <option th:each="d : ${doctors}" th:value="${d.id}" 
+                                        th:attr="data-avatar=${d.imageUrl != null ? d.imageUrl : 'https://ui-avatars.com/api/?name=' + #uris.escapeModelAttr(d.name) + '&background=f0f9ff&color=0284c7&bold=true'},
+                                                 data-specialty=${d.specialty != null ? d.specialty.name : 'Bác sĩ sản khoa'}"
+                                        th:text="${d.name}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Bệnh nhân</label>
+                            <select id="filterPatient" class="w-full">
+                                <option value="">Tất cả bệnh nhân</option>
+                                <option th:each="p : ${patients}" th:value="${p.id}" 
+                                        th:attr="data-avatar=${p.imageUrl != null ? p.imageUrl : 'https://ui-avatars.com/api/?name=' + #uris.escapeModelAttr(p.fullName) + '&background=f1f5f9&color=64748b&bold=true'}"
+                                        th:text="${p.fullName}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-8 border-t border-slate-100 italic text-xs text-slate-400 leading-relaxed font-medium">
+                        <i class="ri-information-line mr-1"></i> Chọn các tiêu chí để xem lịch trình cụ thể của bác sĩ hoặc bệnh nhân.
                     </div>
                 </div>
-                <div class="lg:col-span-3 text-left lg:text-right">
-                    <span id="resultsCount" class="inline-block text-[10px] font-black text-brand-600 bg-brand-50 px-4 py-2 rounded-full uppercase tracking-widest">Đang tải...</span>
+
+                <!-- Stats card -->
+                <div class="bg-slate-900 rounded-[2rem] p-6 text-white overflow-hidden relative">
+                    <div class="relative z-10">
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hiệu suất MediHub</div>
+                        <div class="text-3xl font-extrabold mb-4">98.5%</div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Lịch hẹn hoàn thành sạch</p>
+                    </div>
+                    <i class="ri-pulse-line absolute -bottom-4 -right-4 text-8xl text-slate-800/50"></i>
+                </div>
+            </div>
+
+            <!-- Calendar Area -->
+            <div class="lg:col-span-3">
+                <div class="calendar-container">
+                    <div class="calendar-wrapper">
+                        <div id="calendar"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-            <div class="table-responsive overflow-x-auto px-1">
-                <table id="appointmentTable" class="w-full text-sm min-w-[900px]"></table>
+        <!-- Appointment Detail Modal -->
+        <div id="appointmentModal" class="fixed inset-0 z-[10000] hidden">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm modal-bg-close"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-4">
+                <div class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                    <div class="relative h-32 bg-brand-600 overflow-hidden">
+                        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+                        <button class="absolute top-6 right-6 text-white/80 hover:text-white transition modal-close">
+                            <i class="ri-close-line text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="px-8 pb-8 -mt-12 relative z-10">
+                        <div class="flex justify-between items-end mb-6">
+                            <div class="flex -space-x-3">
+                                <img id="modalPatientAvatar" src="" class="w-20 h-20 rounded-2xl border-4 border-white object-cover shadow-lg">
+                                <img id="modalDoctorAvatar" src="" class="w-16 h-16 rounded-2xl border-4 border-white object-cover shadow-lg mt-4">
+                            </div>
+                            <span id="modalStatusBadge" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm"></span>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <h2 id="modalPatientName" class="text-2xl font-black text-slate-800 tracking-tight"></h2>
+                                <p id="modalDoctorSub" class="text-sm font-bold text-slate-400 mt-1"></p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ngày tháng</div>
+                                    <div id="modalDate" class="text-sm font-extrabold text-slate-700"></div>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Thời gian</div>
+                                    <div id="modalTime" class="text-sm font-extrabold text-slate-700"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-brand-50/50 p-5 rounded-2xl border border-brand-100/50">
+                                <div class="text-[10px] font-black text-brand-600 uppercase tracking-widest mb-2 flex items-center">
+                                    <i class="ri-chat-voice-line mr-2"></i> Lý do khám
+                                </div>
+                                <p id="modalReason" class="text-sm font-bold text-slate-600 italic leading-relaxed"></p>
+                            </div>
+
+                            <div class="flex gap-3 pt-2">
+                                <a id="modalEditBtn" href="#" class="flex-1 bg-brand-600 text-white text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition shadow-lg shadow-brand-500/20">
+                                    <i class="ri-edit-2-line mr-1"></i> Chỉnh sửa
+                                </a>
+                                <button class="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition modal-close">
+                                    Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </th:block>
 
     <th:block th:fragment="script_part">
-        <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
         <script th:inline="none">
+            let calendar;
+            let specialtyChoice, doctorChoice, patientChoice;
+
             $(document).ready(function() {
-                const table = $('#appointmentTable').DataTable({
-                    serverSide: true,
-                    processing: true,
-                    paging: true,
-                    pageLength: 10,
-                    lengthMenu: [ [ 10, 25, 50 ], [ 10, 25, 50 ] ],
-                    order: [ [ 1, "desc" ] ],
-                    dom: "<'row'<'col-sm-12'tr>>" +
-                         "<'row p-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 flex justify-end'p>>",
-                    ajax: {
-                        url: "/api/v1/appointments/list-datatable",
-                        data: function (d) {
-                            d.keyword = $('#idKeyword').val();
+                initFilters();
+                initCalendar();
+            });
+
+            function initFilters() {
+                const strToEl = str => {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = str.trim();
+                    return temp.firstChild;
+                };
+
+                const choicesConfig = {
+                    searchEnabled: true,
+                    itemSelectText: '',
+                    allowHTML: true,
+                    shouldSort: false,
+                    callbackOnCreateTemplates: function(strToEl) {
+                        return {
+                            item: (classNames, data) => {
+                                const classes = classNames.classNames || classNames;
+                                const avatar = data.customProperties && data.customProperties.avatar ? data.customProperties.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.label) + '&background=f1f5f9&color=64748b&bold=true';
+                                return strToEl(`
+                                    <div class="${classes.item} ${data.highlighted ? classes.highlightedState : classes.itemSelectable}">
+                                        <div class="flex items-center">
+                                            ${data.placeholder ? '' : `<img src="${avatar}" class="w-5 h-5 rounded-full mr-2 object-cover border border-slate-100 shadow-sm">`}
+                                            <span class="font-bold text-slate-700">${data.label}</span>
+                                        </div>
+                                    </div>
+                                `);
+                            },
+                            choice: (classNames, data) => {
+                                const classes = classNames.classNames || classNames;
+                                const avatar = data.customProperties && data.customProperties.avatar ? data.customProperties.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.label) + '&background=f1f5f9&color=64748b&bold=true';
+                                const specialty = data.customProperties && data.customProperties.specialty ? data.customProperties.specialty : '';
+                                
+                                return strToEl(`
+                                    <div class="${classes.item} ${classes.itemChoice} ${data.disabled ? classes.itemDisabled : classes.itemSelectable}" data-choice data-id="${data.id}" data-value="${data.value}">
+                                        <div class="flex items-center p-1">
+                                            ${data.placeholder ? '' : `<img src="${avatar}" class="w-8 h-8 rounded-full mr-3 object-cover shadow-sm border border-slate-200">`}
+                                            <div class="flex flex-col">
+                                                <span class="font-bold text-slate-700">${data.label}</span>
+                                                ${specialty ? `<span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${specialty}</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                            }
+                        };
+                    }
+                };
+
+                const setupChoice = (id) => {
+                    const el = document.getElementById(id);
+                    if(!el) return;
+                    const originalOptions = Array.from(el.querySelectorAll('option'));
+                    const choicesData = originalOptions.map(opt => ({
+                        value: opt.value || '',
+                        label: opt.text,
+                        selected: opt.selected,
+                        disabled: opt.disabled,
+                        placeholder: !opt.value,
+                        customProperties: { 
+                            avatar: opt.getAttribute('data-avatar'),
+                            specialty: opt.getAttribute('data-specialty')
+                        }
+                    }));
+                    const choice = new Choices(el, choicesConfig);
+                    choice.clearStore();
+                    choice.setChoices(choicesData, 'value', 'label', true);
+                    el.addEventListener('change', () => {
+                        if(calendar) calendar.refetchEvents();
+                    });
+                    return choice;
+                };
+
+                specialtyChoice = setupChoice('filterSpecialty');
+                doctorChoice = setupChoice('filterDoctor');
+                patientChoice = setupChoice('filterPatient');
+            }
+
+            function initCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                const isMobile = window.innerWidth < 768;
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+                    headerToolbar: {
+                        left: isMobile ? 'prev,next' : 'prev,next today',
+                        center: 'title',
+                        right: isMobile ? 'timeGridDay,dayGridMonth' : 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    locale: 'vi',
+                    firstDay: 1, // Thứ 2
+                    weekends: true, // Hiển thị cả Chủ Nhật
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '21:00:00',
+                    allDaySlot: false,
+                    slotDuration: '00:30:00',
+                    snapDuration: '00:15:00',
+                    nowIndicator: true,
+                    height: 'auto',
+                    expandRows: true,
+                    handleWindowResize: true,
+                    windowResize: function(view) {
+                        if (window.innerWidth < 768) {
+                            calendar.changeView('timeGridDay');
+                        } else {
+                            calendar.changeView('timeGridWeek');
                         }
                     },
-                    language: {
-                        processing: 'Đang xử lý...',
-                        info: 'Hiển thị <b>_START_</b> đến <b>_END_</b> / <b>_TOTAL_</b>',
-                        paginate: { next: '<i class="ri-arrow-right-s-line"></i>', previous: '<i class="ri-arrow-left-s-line"></i>' }
-                    },
-                    columns: [
-                        { title: "ID", data: "id", width: "50px", className: "text-center text-slate-400 font-bold" },
-                        { title: "Bệnh nhân", data: "patient.fullName", render: function(data) {
-                                return '<div class="font-extrabold text-slate-800">' + data + '</div>';
-                        } },
-                        { title: "Bác sĩ", data: "doctor.name", render: function(data, type, row) {
-                                return '<div class="text-brand-600 font-extrabold">' + data + '</div><div class="text-[10px] text-slate-400 uppercase font-black tracking-widest">' + row.doctor.specialty + '</div>';
-                        } },
-                        { title: "Lịch hẹn", data: "appointmentDate", render: function(data, type, row) {
-                                return '<div class="flex flex-col gap-0.5"><div><i class="ri-calendar-line mr-1 text-slate-400 text-xs"></i><span class="font-bold text-slate-700">' + data + '</span></div><div class="text-[11px] text-slate-400"><i class="ri-history-line mr-1 text-slate-400 text-xs"></i>' + row.appointmentTime + '</div></div>';
-                        } },
-                        { title: "Trạng thái", data: "status", render: function(data) {
-                                var badgeClass = 'bg-slate-50 text-slate-600';
-                                if(data === 'CONFIRMED') badgeClass = 'bg-emerald-50 text-emerald-600';
-                                if(data === 'PENDING') badgeClass = 'bg-amber-50 text-amber-600';
-                                if(data === 'CANCELLED') badgeClass = 'bg-rose-50 text-rose-600';
-                                return '<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ' + badgeClass + '">' + data + '</span>';
-                        } },
-                        { title: "Thao tác", data: null, orderable: false, className: "text-right", render: function(data, type, row) {
-                                return '<div class="flex justify-end space-x-1"><a href="/appointments/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"><i class="ri-edit-2-line text-lg"></i></a><button onclick="deleteAppointment(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><i class="ri-delete-bin-line text-lg"></i></button></div>';
-                        } }
-                    ],
-                    drawCallback: function() { $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' lịch hẹn'); }
-                });
+                    events: function(fetchInfo, successCallback, failureCallback) {
+                        $('#loading-overlay').css('display', 'flex');
+                        
+                        const params = new URLSearchParams({
+                            start: fetchInfo.start.toISOString(),
+                            end: fetchInfo.end.toISOString(),
+                            specialtyId: $('#filterSpecialty').val(),
+                            doctorId: $('#filterDoctor').val(),
+                            patientId: $('#filterPatient').val()
+                        });
 
-                $('#idKeyword').on('keyup', function() { table.draw(); });
-                $('#btnRefresh').on('click', function() { $('#idKeyword').val(''); table.draw(); });
-            });
-            function deleteAppointment(id) { if(confirm('Bạn có chắc chắn muốn xóa lịch hẹn này?')) { window.location.href = '/appointments/delete/' + id; } }
+                        fetch(`/api/v1/appointments/calendar?${params.toString()}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                successCallback(data);
+                                $('#loading-overlay').fadeOut(300);
+                            })
+                            .catch(err => {
+                                failureCallback(err);
+                                $('#loading-overlay').fadeOut(300);
+                            });
+                    },
+                    eventContent: function(arg) {
+                        const props = arg.event.extendedProps;
+                        const timeStr = arg.timeText;
+                        const patientAvatar = props.patientAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(props.patientName)}&background=fff&color=64748b`;
+                        const doctorAvatar = props.doctorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(props.doctorName)}&background=fff&color=0284c7`;
+                        
+                        return {
+                            html: `
+                                <div class="event-content" title="${props.reason || 'Không có lý do'}">
+                                    <div class="flex justify-between items-start">
+                                        <div class="event-time-badge">${timeStr}</div>
+                                        <div class="text-white/50 text-[10px]"><i class="ri-more-2-fill"></i></div>
+                                    </div>
+                                    <div>
+                                        <div class="event-title">${props.patientName}</div>
+                                        <div class="text-[9px] font-bold opacity-70 mt-0.5 truncate">${props.doctorName}</div>
+                                    </div>
+                                    <div class="event-avatars">
+                                        <img src="${patientAvatar}" class="event-avatar" title="Bệnh nhân">
+                                        <img src="${doctorAvatar}" class="event-avatar" title="Bác sĩ">
+                                    </div>
+                                </div>
+                            `
+                        };
+                    },
+                    eventClick: function(info) {
+                        const props = info.event.extendedProps;
+                        const date = info.event.start.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                        const time = info.event.start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                        
+                        // Fill Modal
+                        $('#modalPatientName').text(props.patientName);
+                        $('#modalDoctorSub').text('Bác sĩ: ' + props.doctorName);
+                        $('#modalReason').text(props.reason || 'Không có lý do cụ thể.');
+                        $('#modalDate').text(date);
+                        $('#modalTime').text(time);
+                        $('#modalPatientAvatar').attr('src', props.patientAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(props.patientName)}&background=f1f5f9&color=64748b&bold=true`);
+                        $('#modalDoctorAvatar').attr('src', props.doctorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(props.doctorName)}&background=f0f9ff&color=0284c7&bold=true`);
+                        $('#modalEditBtn').attr('href', `/appointments/edit/${info.event.id}`);
+                        
+                        // Status Badge
+                        const status = props.status;
+                        let badgeClass = 'bg-amber-50 text-amber-600';
+                        if(status === 'CONFIRMED') badgeClass = 'bg-emerald-50 text-emerald-600';
+                        if(status === 'CANCELLED') badgeClass = 'bg-rose-50 text-rose-600';
+                        $('#modalStatusBadge').text(status).attr('class', 'px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ' + badgeClass);
+
+                        $('#appointmentModal').fadeIn(200).removeClass('hidden').addClass('flex');
+                    }
+                });
+                calendar.render();
+
+                // Force size update to fix missing columns on initial load
+                setTimeout(() => {
+                    calendar.updateSize();
+                }, 50);
+
+                // Modal closing logic
+                $('.modal-close, .modal-bg-close').on('click', function() {
+                    $('#appointmentModal').fadeOut(200);
+                });
+            }
         </script>
     </th:block>
 </body>

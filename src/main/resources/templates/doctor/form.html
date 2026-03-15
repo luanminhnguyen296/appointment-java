@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, '/doctors')}">
 <head>
     <title th:text="${doctor.id == null ? 'Thêm mới' : 'Cập nhật'} + ' bác sĩ | MediAdmin'"></title>
     <th:block th:fragment="head_part">
@@ -85,6 +85,13 @@
     </th:block>
 </head>
 <body>
+    <th:block th:fragment="breadcrumb_part">
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <a href="/doctors" class="hover:text-brand-600 transition">Bác sĩ</a>
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <span class="text-slate-600" th:text="${doctor.id == null ? 'Thêm bác sĩ' : 'Cập nhật bác sĩ'}"></span>
+    </th:block>
+
     <th:block th:fragment="content_part">
         <div class="max-w-4xl mx-auto">
             <div class="mb-10 flex justify-between items-end">
@@ -106,7 +113,7 @@
                         <!-- Avatar Section -->
                         <div class="md:col-span-2 flex items-center space-x-6 bg-slate-50 p-6 rounded-[2rem] border border-dashed border-slate-200">
                             <div class="relative group">
-                                <img id="previewAvatar" th:src="${doctor.imageUrl != null && doctor.imageUrl != '' ? doctor.imageUrl : 'https://ui-avatars.com/api/?name=Doctor&background=f0f9ff&color=0284c7&bold=true'}" 
+                                <img id="previewAvatar" th:src="${doctor.imageUrl != null and doctor.imageUrl != '' ? doctor.imageUrl : 'https://ui-avatars.com/api/?name=Doctor&background=f0f9ff&color=0284c7&bold=true'}" 
                                      class="w-24 h-24 rounded-3xl object-cover border-4 border-white shadow-xl" alt="Avatar">
                                 <label for="imageFile" class="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold cursor-pointer">
                                     <i class="ri-image-edit-line text-2xl"></i>
@@ -132,8 +139,8 @@
                                     class="w-full">
                                 <option value="" disabled selected>Đang tải chuyên khoa...</option>
                                 <!-- Pre-load selected specialty if editing -->
-                                <option th:if="*{specialty != null}" th:value="*{specialty.id}" th:text="*{specialty.name}" selected
-                                        th:attr="data-img=*{specialty.imageUrl}"></option>
+                                <option th:if="*{specialty != null}" th:value="*{specialty?.id}" th:text="*{specialty?.name}" selected
+                                        th:attr="data-img=*{specialty?.imageUrl}"></option>
                             </select>
                         </div>
 
@@ -171,8 +178,8 @@
                              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Cơ sở công tác (Lấy từ hệ thống API)</label>
                              <select th:field="*{hospitals}" id="hospitalsSelect" multiple class="w-full">
                                  <!-- Pre-load selected hospitals if editing -->
-                                 <option th:each="h : *{hospitals}" th:value="${h.id}" th:text="${h.name}" selected
-                                         th:attr="data-img=${h.imageUrl}"></option>
+                                 <option th:each="h : *{hospitals}" th:value="${h?.id}" th:text="${h?.name}" selected
+                                         th:attr="data-img=${h?.imageUrl}"></option>
                              </select>
                              <p class="text-[10px] text-slate-400 mt-2 font-medium">Bác sĩ có thể công tác tại nhiều bệnh viện trong hệ thống.</p>
                         </div>
@@ -180,8 +187,25 @@
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email</label>
                             <input type="email" th:field="*{email}" placeholder="Email của bác sĩ"
-                                   class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all">
+                                   class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all text-slate-700">
                         </div>
+
+                        <!-- Rating Field -->
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Đánh giá bác sĩ (1 - 5 sao)</label>
+                            <div class="flex items-center gap-4">
+                                <div class="relative flex-1">
+                                    <i class="ri-star-fill absolute left-5 top-1/2 -translate-y-1/2 text-amber-400 text-lg"></i>
+                                    <input type="number" th:field="*{rating}" min="1" max="5" step="0.1"
+                                           class="w-full pl-12 pr-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all text-slate-700">
+                                </div>
+                                <div class="bg-amber-50 border border-amber-100 px-6 py-4 rounded-2xl">
+                                    <span class="text-amber-600 font-black text-sm">PREMIUM</span>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-2 font-medium italic">Đánh giá từ 1.0 đến 5.0 dựa trên phản hồi thực tế của bệnh nhân.</p>
+                        </div>
+
                     </div>
 
                     <div class="pt-10 flex justify-end space-x-4">

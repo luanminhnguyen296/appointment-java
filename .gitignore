@@ -10,11 +10,14 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
+
 # Projects files
 .classpath
 .project
 .settings/
 .factorypath
+uploads/*
+
 
 # IntelliJ IDEA
 .idea/

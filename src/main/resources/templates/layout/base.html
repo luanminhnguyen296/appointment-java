@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content_part, head_part, script_part)">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content_part, head_part, script_part, breadcrumb_part, back_url)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -90,6 +90,22 @@
         </header>
 
         <main class="p-10 min-h-screen">
+            <!-- Breadcrumb & Back Button -->
+            <div th:if="${breadcrumb_part}" class="flex items-center mb-6">
+                <!-- Back Button -->
+                <a th:if="${back_url}" th:href="${back_url}" 
+                   class="mr-4 w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-brand-600 hover:border-brand-200 hover:bg-brand-50 transition shadow-sm group">
+                    <i class="ri-arrow-left-line text-lg group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+
+                <nav class="flex items-center space-x-2 text-slate-400 text-[11px] font-bold uppercase tracking-widest">
+                    <a href="/" class="hover:text-brand-600 transition flex items-center">
+                        <i class="ri-home-4-line mr-1 text-sm"></i> Trang chủ
+                    </a>
+                    <th:block th:replace="${breadcrumb_part}"></th:block>
+                </nav>
+            </div>
+
             <th:block th:replace="${content_part} ?: ~{}"></th:block>
         </main>
     </div>

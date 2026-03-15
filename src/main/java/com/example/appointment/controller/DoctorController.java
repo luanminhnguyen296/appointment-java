@@ -107,11 +107,12 @@ public class DoctorController {
         int page = start / length;
         Pageable pageable = PageRequest.of(page, length, Sort.by("id").descending());
 
-        Page<Doctor> doctorPage = doctorService.getDoctorsDatatable(keyword, specialtyId, hospitalId, gender, pageable);
+        Page<Doctor> doctorPage = doctorService.getDoctorsDatatable(keyword, specialtyId, hospitalId, gender,
+                pageable);
 
         Map<String, Object> response = new HashMap<>();
         response.put("draw", draw);
-        response.put("recordsTotal", doctorService.getAllDoctors().size());
+        response.put("recordsTotal", doctorPage.getTotalElements());
         response.put("recordsFiltered", doctorPage.getTotalElements());
         response.put("data", doctorPage.getContent());
 

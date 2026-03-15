@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, null)}">
 <head>
     <title>Danh sách bác sĩ | MediAdmin</title>
     <th:block th:fragment="head_part">
@@ -33,6 +33,11 @@
     </th:block>
 </head>
 <body>
+    <th:block th:fragment="breadcrumb_part">
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <span class="text-slate-600">Bác sĩ</span>
+    </th:block>
+
     <th:block th:fragment="content_part">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
             <div>
@@ -172,18 +177,20 @@
                 });
 
                 // Load Filter Data
+                const allSpecialtyAvatar = 'https://ui-avatars.com/api/?name=ALL&background=f1f5f9&color=64748b&bold=true';
                 fetch('/api/v1/specialties/search')
                     .then(res => res.json())
                     .then(data => {
                         const choices = data.map(s => ({ value: s.id, label: s.name, customProperties: { avatar: s.imageUrl } }));
-                        specialtyChoice.setChoices([{ value: '', label: 'Tất cả chuyên khoa', selected: true, placeholder: true }, ...choices], 'value', 'label', true);
+                        specialtyChoice.setChoices([{ value: '', label: 'Tất cả chuyên khoa', selected: true, customProperties: { avatar: allSpecialtyAvatar } }, ...choices], 'value', 'label', true);
                     });
 
+                const allHospitalAvatar = 'https://ui-avatars.com/api/?name=ALL&background=f1f5f9&color=64748b&bold=true';
                 fetch('/api/v1/hospitals/search')
                     .then(res => res.json())
                     .then(data => {
                         const choices = data.map(h => ({ value: h.id, label: h.name, customProperties: { avatar: h.imageUrl } }));
-                        hospitalChoice.setChoices([{ value: '', label: 'Tất cả bệnh viện', selected: true, placeholder: true }, ...choices], 'value', 'label', true);
+                        hospitalChoice.setChoices([{ value: '', label: 'Tất cả bệnh viện', selected: true, customProperties: { avatar: allHospitalAvatar } }, ...choices], 'value', 'label', true);
                     });
 
                 const table = $('#doctorTable').DataTable({
@@ -229,6 +236,16 @@
                                 });
                                 html += '</div>';
                                 return html;
+                        } },
+                        { title: "Đánh giá", data: "rating", className: "text-center", width: "120px", render: function(data) {
+                                var val = parseFloat(data || 5.0);
+                                var stars = '';
+                                for(var i=1; i<=5; i++) {
+                                    if(i <= Math.floor(val)) stars += '<i class="ri-star-fill text-amber-400"></i>';
+                                    else if(i - 0.5 <= val) stars += '<i class="ri-star-half-fill text-amber-400"></i>';
+                                    else stars += '<i class="ri-star-line text-slate-300"></i>';
+                                }
+                                return '<div class="flex flex-col items-center gap-1"><div class="flex text-sm">' + stars + '</div><span class="text-[10px] font-black text-slate-400">' + val.toFixed(1) + ' / 5.0</span></div>';
                         } },
                         { title: "Liên hệ", data: "phone", render: function(data, type, row) {
                                 return '<div class="flex flex-col gap-1"><div><i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + (data || 'N/A') + '</div><div class="text-[11px] text-slate-400 font-medium"><i class="ri-mail-line mr-1.5 text-slate-400 text-xs"></i>' + (row.email || 'N/A') + '</div></div>';

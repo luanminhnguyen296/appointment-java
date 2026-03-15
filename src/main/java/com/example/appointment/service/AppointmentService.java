@@ -35,4 +35,9 @@ public class AppointmentService {
     public Page<Appointment> getAppointmentsDatatable(String keyword, Pageable pageable) {
         return appointmentRepository.findByKeyword(keyword, pageable);
     }
+
+    public List<Appointment> getCalendarEvents(Long specialtyId, Long doctorId, Long patientId,
+            java.time.LocalDate start, java.time.LocalDate end) {
+        return appointmentRepository.findByFilters(specialtyId, doctorId, patientId, start, end);
+    }
 }

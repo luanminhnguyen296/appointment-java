@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, null)}">
 <head>
     <title>Giới thiệu | MediHub</title>
     <th:block th:fragment="head_part">
@@ -67,6 +67,11 @@
     </th:block>
 </head>
 <body>
+    <th:block th:fragment="breadcrumb_part">
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <span class="text-slate-600">Giới thiệu</span>
+    </th:block>
+
     <th:block th:fragment="content_part">
         <!-- Hero Section -->
         <div class="about-hero mb-12 shadow-2xl shadow-blue-500/20">

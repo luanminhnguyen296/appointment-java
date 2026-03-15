@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part})}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, '/patients')}">
 <head>
     <title th:text="${patient.id == null ? 'Bệnh Nhân Mới' : 'Sửa Hồ Sơ'} + ' | MediAdmin'"></title>
     <th:block th:fragment="head_part">
@@ -21,6 +21,13 @@
     </th:block>
 </head>
 <body>
+    <th:block th:fragment="breadcrumb_part">
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <a href="/patients" class="hover:text-brand-600 transition">Bệnh nhân</a>
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <span class="text-slate-600" th:text="${patient.id == null ? 'Thêm mới' : 'Cập nhật'}"></span>
+    </th:block>
+
     <th:block th:fragment="content_part">
         <div class="max-w-4xl mx-auto pb-20">
             <div class="mb-10">

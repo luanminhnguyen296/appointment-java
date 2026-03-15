@@ -34,6 +34,7 @@ public class DoctorService {
 
     public Page<Doctor> getDoctorsDatatable(String keyword, Long specialtyId, Long hospitalId, String gender,
             Pageable pageable) {
-        return doctorRepository.findWithFilters(keyword, specialtyId, hospitalId, gender, pageable);
+        String searchKeyword = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
+        return doctorRepository.findWithFilters(searchKeyword, specialtyId, hospitalId, gender, pageable);
     }
 }

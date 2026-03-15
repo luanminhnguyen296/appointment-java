@@ -43,6 +43,9 @@ public class Doctor {
     @JoinTable(name = "doctor_hospitals", joinColumns = @JoinColumn(name = "doctor_id"), inverseJoinColumns = @JoinColumn(name = "hospital_id"))
     private List<Hospital> hospitals = new ArrayList<>();
 
+    @Column(name = "rating")
+    private Double rating = 5.0; // Mặc định 5 sao
+
     public Doctor() {
     }
 
@@ -122,5 +125,13 @@ public class Doctor {
 
     public void setHospitals(List<Hospital> hospitals) {
         this.hospitals = hospitals;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 }
