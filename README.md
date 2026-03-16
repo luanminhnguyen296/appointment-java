@@ -46,7 +46,7 @@ _Lưu ý: Database sẽ được tạo tự động với tên `appointment`._
 ### 3. Chạy ứng dụng Spring Boot
 
 ```bash
-mvn spring-boot:run
+mvn clean spring-boot:run
 ```
 
 ### 4. Truy cập ứng dụng
