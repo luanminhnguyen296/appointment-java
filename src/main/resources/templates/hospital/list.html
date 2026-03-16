@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, null)}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, '/hospitals')}">
 <head>
-    <title>Danh sách bệnh viện | MediAdmin</title>
+    <title>Cơ sở y tế | MediAdmin</title>
     <th:block th:fragment="head_part">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
         <style>
             .dataTables_wrapper .dataTables_filter { display: none; }
+            table.dataTable { width: 100% !important; table-layout: fixed !important; }
             table.dataTable thead th { 
                 background: #f8fafc !important; color: #64748b !important; 
                 font-weight: 800 !important; text-transform: uppercase !important; 
                 font-size: 11px !important; border-bottom: 1px solid #f1f5f9 !important;
-                padding: 16px 24px !important;
-                white-space: nowrap;
+                padding: 16px 12px !important;
             }
             table.dataTable tbody td { 
-                padding: 16px 24px !important; 
+                padding: 16px 12px !important; 
                 border-bottom: 1px solid #f1f5f9 !important;
                 vertical-align: middle;
             }
@@ -23,10 +23,7 @@
                 width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
                 background: #f8fafc; border: 1px solid #e2e8f0; overflow: hidden;
             }
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-            @media (min-width: 768px) {
-                .premium-card { padding: 2rem; }
-            }
+            .premium-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         </style>
     </th:block>
 </head>
@@ -43,9 +40,6 @@
                 <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Danh sách các bệnh viện và phòng khám liên kết.</p>
             </div>
             <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                <button id="btnRefresh" class="flex-1 lg:flex-none bg-white border border-slate-200 text-slate-600 px-5 py-3 rounded-xl hover:bg-slate-50 transition shadow-sm font-bold text-sm flex items-center justify-center">
-                    <i class="ri-refresh-line mr-2"></i> Làm mới
-                </button>
                 <a href="/hospitals/new" class="flex-1 lg:flex-none bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition shadow-lg font-extrabold text-sm flex items-center justify-center">
                     <i class="ri-hospital-line mr-2"></i> Thêm cơ sở
                 </a>
@@ -67,9 +61,9 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-            <div class="table-responsive overflow-x-auto px-1">
-                <table id="hospitalTable" class="w-full text-sm min-w-[800px]"></table>
+        <div class="bg-white rounded-[1rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="table-responsive">
+                <table id="hospitalTable" class="w-full text-sm border-collapse"></table>
             </div>
         </div>
     </th:block>
@@ -79,6 +73,7 @@
         <script th:inline="none">
             $(document).ready(function() {
                 const table = $('#hospitalTable').DataTable({
+                    autoWidth: false,
                     serverSide: true,
                     processing: true,
                     paging: true,
@@ -99,28 +94,68 @@
                         paginate: { next: '<i class="ri-arrow-right-s-line"></i>', previous: '<i class="ri-arrow-left-s-line"></i>' }
                     },
                     columns: [
-                        { title: "STT", data: null, width: "60px", className: "text-center text-slate-400 font-bold", render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } },
-                        { title: "Cơ sở", data: "name", render: function(data, type, row) {
+                        { 
+                            title: "STT", 
+                            data: null, 
+                            width: "8%",
+                            className: "text-center text-slate-400 font-bold", 
+                            render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } 
+                        },
+                        { 
+                            title: "Cơ sở", 
+                            data: "name", 
+                            width: "30%",
+                            render: function(data, type, row) {
                                 var logo = row.imageUrl ? row.imageUrl : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data) + '&background=f8fafc&color=0284c7&bold=true';
-                                return '<div class="flex items-center"><div class="avatar-hospital mr-4"><img src="' + logo + '" class="w-full h-full object-cover"></div><div class="font-extrabold text-slate-800">' + data + '</div></div>';
-                        } },
-                        { title: "Địa chỉ", data: "address", render: function(data) {
-                                return '<div class="text-slate-500 font-medium max-w-xs truncate">' + (data || 'N/A') + '</div>';
-                        } },
-                        { title: "Liên hệ", data: "phone", render: function(data) {
-                                return '<div><i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + (data || 'N/A') + '</div>';
-                        } },
-                        { title: "Thao tác", data: null, orderable: false, className: "text-right", render: function(data, type, row) {
-                                return '<div class="flex justify-end space-x-1"><a href="/hospitals/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"><i class="ri-edit-2-line text-lg"></i></a><button onclick="deleteHospital(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><i class="ri-delete-bin-line text-lg"></i></button></div>';
-                        } }
+                                return '<div class="flex items-center overflow-hidden"><div class="avatar-hospital mr-3 shrink-0"><img src="' + logo + '" class="w-full h-full object-cover"></div><div class="font-extrabold text-slate-800 truncate">' + data + '</div></div>';
+                            } 
+                        },
+                        { 
+                            title: "Địa chỉ", 
+                            data: "address", 
+                            width: "35%",
+                            render: function(data) {
+                                return '<div class="text-slate-500 font-medium truncate">' + (data || 'N/A') + '</div>';
+                            } 
+                        },
+                        { 
+                            title: "Liên hệ", 
+                            data: "phone", 
+                            width: "15%",
+                            render: function(data) {
+                                return '<div class="truncate"><i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + (data || 'N/A') + '</div>';
+                            } 
+                        },
+                        { 
+                            title: "Thao tác", 
+                            data: null, 
+                            width: "12%",
+                            orderable: false, 
+                            className: "text-right", 
+                            render: function(data, type, row) {
+                                return '<div class="flex justify-end space-x-1">' +
+                                       '<a href="/hospitals/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Sửa">' +
+                                       '<i class="ri-edit-2-line text-lg"></i>' +
+                                       '</a>' +
+                                       '<button onclick="deleteHospital(\'' + row.id + '\')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">' +
+                                       '<i class="ri-delete-bin-line text-lg"></i>' +
+                                       '</button>' +
+                                       '</div>';
+                            } 
+                        }
                     ],
-                    drawCallback: function() { $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' cơ sở'); }
+                    drawCallback: function() { 
+                        $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' cơ sở'); 
+                    }
                 });
 
                 $('#idKeyword').on('keyup', function() { table.draw(); });
-                $('#btnRefresh').on('click', function() { $('#idKeyword').val(''); table.draw(); });
             });
-            function deleteHospital(id) { if(confirm('Bạn có chắc chắn muốn xóa cơ sở này? Hệ thống sẽ cập nhật lại thông tin bác sĩ liên quan.')) { window.location.href = '/hospitals/delete/' + id; } }
+            function deleteHospital(id) { 
+                if(confirm('Bạn có chắc chắn muốn xóa cơ sở này?')) { 
+                    window.location.href = '/hospitals/delete/' + id; 
+                } 
+            }
         </script>
     </th:block>
 </body>

@@ -7,15 +7,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
         <link rel="stylesheet" href="/css/choices-custom.css">
         <style>
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); }
-            #imagePreview { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 1rem; }
-            .upload-zone { 
-                border: 2px dashed #e2e8f0; border-radius: 1.5rem; transition: all 0.3s;
-                position: relative; overflow: hidden; cursor: pointer; aspect-ratio: 4/3;
-                background: #f8fafc; display: flex; align-items: center; justify-content: center;
-            }
-            .upload-zone:hover { border-color: #0284c7; background: #f0f9ff; }
-            .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10; }
+            .premium-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); }
             input:focus, select:focus { border-color: #0284c7 !important; background: white !important; }
         </style>
     </th:block>
@@ -36,40 +28,42 @@
             </div>
 
             <div class="premium-card">
-                <form th:action="@{/patients/save}" th:object="${patient}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <form th:action="@{/patients/save}" th:object="${patient}" method="POST" class="space-y-8">
                     <input type="hidden" th:field="*{id}" />
-                    <input type="hidden" th:field="*{imageUrl}" />
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Avatar Upload -->
+                        <!-- Image URL Input -->
                         <div class="md:col-span-2 space-y-3">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Ảnh đại diện bệnh nhân</label>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Đường dẫn ảnh đại diện (URL)</label>
                             <div class="flex flex-col md:flex-row gap-6">
-                                <div class="upload-zone w-full md:w-64">
-                                    <img id="imagePreview" 
-                                         th:src="${patient.imageUrl != null ? patient.imageUrl : ''}" 
-                                         th:style="${patient.imageUrl != null and !#strings.isEmpty(patient.imageUrl) ? 'display: block' : 'display: none'}">
-                                    
-                                    <div id="uploadPlaceholder" class="text-center p-4" 
-                                         th:style="${patient.imageUrl != null and !#strings.isEmpty(patient.imageUrl) ? 'display: none' : 'display: block'}">
-                                        <i class="ri-image-add-line text-3xl text-slate-300 mb-2"></i>
-                                        <p class="text-[11px] font-bold text-slate-500">Bấm để chọn ảnh</p>
-                                        <p class="text-[9px] text-slate-400 mt-1">JPG, PNG (Tối đa 2MB)</p>
+                                <div class="w-full md:w-64">
+                                    <div class="aspect-square bg-slate-50 border-2 border-slate-100 rounded-2xl overflow-hidden flex items-center justify-center relative group">
+                                        <img id="imagePreview" 
+                                             th:src="${patient.imageUrl != null ? patient.imageUrl : ''}" 
+                                             th:style="${patient.imageUrl != null and !#strings.isEmpty(patient.imageUrl) ? 'display: block' : 'display: none'}"
+                                             class="w-full h-full object-cover">
+                                        
+                                        <div id="uploadPlaceholder" 
+                                             th:style="${patient.imageUrl != null and !#strings.isEmpty(patient.imageUrl) ? 'display: none' : 'display: flex'}"
+                                             class="flex-col items-center">
+                                            <i class="ri-image-line text-4xl text-slate-200"></i>
+                                            <span class="text-[10px] text-slate-400 font-bold mt-2">Chưa có ảnh</span>
+                                        </div>
                                     </div>
-                                    <input type="file" name="imageFile" id="imageFile" accept="image/*">
                                 </div>
 
-                                <!-- Info Box -->
-                                <div class="flex-1 flex flex-col justify-center">
-                                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl h-full flex flex-col justify-center">
-                                        <p class="text-xs font-bold text-blue-800 flex items-center mb-3">
-                                            <i class="ri-information-line mr-2 text-sm"></i> Lưu ý khi tải ảnh
+                                <!-- Input Box -->
+                                <div class="flex-1 flex flex-col justify-center space-y-4">
+                                    <input type="text" th:field="*{imageUrl}" id="imageUrlInput" placeholder="https://example.com/image.jpg"
+                                           class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all text-slate-700">
+                                    
+                                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl">
+                                        <p class="text-xs font-bold text-blue-800 flex items-center mb-2">
+                                            <i class="ri-information-line mr-2 text-sm"></i> Lưu ý về hình ảnh
                                         </p>
-                                        <ul class="text-[10px] text-blue-600/80 space-y-2 font-bold list-none">
-                                            <li class="flex items-start"><i class="ri-checkbox-circle-line mr-2 mt-0.5"></i> Nên dùng ảnh chân dung chính diện và rõ nét.</li>
-                                            <li class="flex items-start"><i class="ri-checkbox-circle-line mr-2 mt-0.5"></i> Dung lượng tối đa 2MB để tối ưu tốc độ.</li>
-                                            <li class="flex items-start"><i class="ri-checkbox-circle-line mr-2 mt-0.5"></i> Ảnh mới sẽ thay thế hoàn toàn ảnh cũ.</li>
-                                        </ul>
+                                        <p class="text-[10px] text-blue-600/80 font-bold leading-relaxed">
+                                            Dán đường dẫn ảnh trực tiếp từ internet (Google Drive, Imgur, v.v.). Hệ thống sẽ tự động hiển thị bản xem trước ở bên cạnh.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -167,22 +161,22 @@
         <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Image Preview Preview
-                const imageFile = document.getElementById('imageFile');
+                // Image Preview from URL
+                const imageUrlInput = document.getElementById('imageUrlInput');
                 const imagePreview = document.getElementById('imagePreview');
                 const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
-                if (imageFile) {
-                    imageFile.addEventListener('change', function() {
-                        const file = this.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                imagePreview.src = e.target.result;
-                                imagePreview.style.display = 'block';
-                                uploadPlaceholder.style.display = 'none';
-                            }
-                            reader.readAsDataURL(file);
+                if (imageUrlInput) {
+                    imageUrlInput.addEventListener('input', function() {
+                        const url = this.value.trim();
+                        if (url) {
+                            imagePreview.src = url;
+                            imagePreview.style.display = 'block';
+                            uploadPlaceholder.style.display = 'none';
+                        } else {
+                            imagePreview.src = '';
+                            imagePreview.style.display = 'none';
+                            uploadPlaceholder.style.display = 'flex';
                         }
                     });
                 }

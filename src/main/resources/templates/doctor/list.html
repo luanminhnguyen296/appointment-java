@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, null)}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, '/doctors')}">
 <head>
     <title>Danh sách bác sĩ | MediAdmin</title>
     <th:block th:fragment="head_part">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
         <style>
             .dataTables_wrapper .dataTables_filter { display: none; }
+            table.dataTable { width: 100% !important; table-layout: fixed !important; }
             table.dataTable thead th { 
                 background: #f8fafc !important; color: #64748b !important; 
                 font-weight: 800 !important; text-transform: uppercase !important; 
                 font-size: 11px !important; border-bottom: 1px solid #f1f5f9 !important;
-                padding: 16px 24px !important;
-                white-space: nowrap;
+                padding: 16px 12px !important;
             }
             table.dataTable tbody td { 
-                padding: 16px 24px !important; 
+                padding: 16px 12px !important; 
                 border-bottom: 1px solid #f1f5f9 !important;
                 vertical-align: middle;
             }
             .avatar-premium { 
                 width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
                 background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); font-weight: 800; border: 1px solid #bae6fd;
-                flex-shrink: 0; overflow: hidden;
+                flex-shrink: 0;
             }
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-            
-            @media (min-width: 768px) {
-                .premium-card { padding: 2rem; }
-            }
+            .premium-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         </style>
     </th:block>
 </head>
@@ -42,60 +38,35 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Đội Ngũ Bác Sĩ</h1>
-                <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Quản lý chuyên gia y tế tại hệ thống MediHub.</p>
+                <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Quản lý danh sách chuyên gia y tế tại MediHub.</p>
             </div>
             <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                <button id="btnRefresh" class="flex-1 lg:flex-none bg-white border border-slate-200 text-slate-600 px-5 py-3 rounded-xl hover:bg-slate-50 transition shadow-sm font-bold text-sm flex items-center justify-center">
-                    <i class="ri-refresh-line mr-2"></i> Làm mới
-                </button>
                 <a href="/doctors/new" class="flex-1 lg:flex-none bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition shadow-lg font-extrabold text-sm flex items-center justify-center">
-                    <i class="ri-user-add-line mr-2"></i> Thêm bác sĩ
+                    <i class="ri-user-add-line mr-2"></i> <span>Thêm <span class="hidden sm:inline">bác sĩ</span></span>
                 </a>
             </div>
         </div>
 
+        <!-- Filter Card -->
         <div class="premium-card mb-8">
-            <div class="space-y-6">
-                <!-- Search Bar -->
-                <div class="relative transition-all bg-slate-50 border border-slate-100 rounded-xl overflow-hidden px-4 focus-within:bg-white focus-within:border-brand-300 focus-within:ring-4 focus-within:ring-brand-500/10 shadow-sm">
-                    <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="idKeyword" placeholder="Tìm tên bác sĩ, số điện thoại hoặc email..."
-                           class="w-full pl-8 pr-2 py-3 bg-transparent outline-none font-bold text-xs text-slate-700" autocomplete="off">
-                </div>
-
-                <!-- Advanced Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 filter-sm">
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Chuyên khoa</label>
-                        <select id="filterSpecialty" class="w-full"></select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Cơ sở công tác</label>
-                        <select id="filterHospital" class="w-full"></select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Giới tính</label>
-                        <select id="filterGender" class="w-full">
-                            <option value="">Tất cả giới tính</option>
-                            <option value="Nam">Nam</option>
-                            <option value="Nữ">Nữ</option>
-                            <option value="Khác">Khác</option>
-                        </select>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-center">
+                <div class="md:col-span-12 lg:col-span-9">
+                    <div class="relative transition-all bg-slate-50 border border-transparent rounded-2xl overflow-hidden px-5 py-0.5 focus-within:bg-white focus-within:border-brand-300 focus-within:ring-4 focus-within:ring-brand-500/10">
+                        <i class="ri-search-2-line absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="idKeyword" placeholder="Tìm tên bác sĩ, email..."
+                               class="w-full pl-8 pr-2 py-4 bg-transparent outline-none font-medium text-sm" autocomplete="off">
                     </div>
                 </div>
-
-                <div class="flex justify-between items-center pt-2 border-t border-slate-50">
-                    <span id="resultsCount" class="text-[10px] font-black text-brand-600 bg-brand-50 px-4 py-2 rounded-full uppercase tracking-widest">Đang tải...</span>
-                    <button id="btnClearFilters" class="text-[10px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">
-                        <i class="ri-filter-off-line mr-1"></i> Xóa bộ lọc
-                    </button>
+                <div class="md:col-span-12 lg:col-span-3 text-left lg:text-right">
+                    <span id="resultsCount" class="inline-block text-[10px] font-black text-brand-600 bg-brand-50 px-4 py-2 rounded-full uppercase tracking-widest">Đang tải...</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-            <div class="table-responsive overflow-x-auto px-1">
-                <table id="doctorTable" class="w-full text-sm min-w-[900px]"></table>
+        <!-- Table Container -->
+        <div class="bg-white rounded-[1rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="table-responsive">
+                <table id="doctorTable" class="w-full text-sm border-collapse"></table>
             </div>
         </div>
     </th:block>
@@ -104,96 +75,8 @@
         <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
         <script th:inline="none">
             $(document).ready(function() {
-                // Utility for string to element
-                const strToEl = str => {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = str.trim();
-                    return temp.firstChild;
-                };
-
-                // Choices.js Template Builder (Exact Logic from AdminX)
-                const createPremiumTemplates = function(strToEl) {
-                    return {
-                        item: (classNames, data) => {
-                            // Robust check for classNames object (support for v9 and v10+)
-                            const classes = classNames.classNames || classNames;
-                            const avatar = data.customProperties && data.customProperties.avatar ? data.customProperties.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.label) + '&background=f1f5f9&color=64748b&bold=true';
-                            
-                            // Support for multi-select remove button if needed
-                            const removeBtn = data.placeholder ? '' : `
-                                <button type="button" class="${classes.button}" data-button aria-label="Remove item: '${data.value}'">
-                                    Remove item
-                                </button>
-                            `;
-
-                            return strToEl(`
-                                <div class="${classes.item} ${data.highlighted ? classes.highlightedState : classes.itemSelectable} ${data.placeholder ? classes.placeholder : ''}" 
-                                     data-item data-id="${data.id}" data-value="${data.value}" 
-                                     ${data.active ? 'aria-selected="true"' : ""} ${data.disabled ? 'aria-disabled="true"' : ""}>
-                                    <div class="flex items-center">
-                                        ${data.placeholder ? '' : `<img src="${avatar}" class="filter-avatar w-4 h-4 mr-2" style="margin-right: 6px;">`}
-                                        <span class="font-bold text-slate-700">${data.label}</span>
-                                    </div>
-                                    ${removeBtn}
-                                </div>
-                            `);
-                        },
-                        choice: (classNames, data) => {
-                            const classes = classNames.classNames || classNames;
-                            const avatar = data.customProperties && data.customProperties.avatar ? data.customProperties.avatar : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.label) + '&background=f1f5f9&color=64748b&bold=true';
-                            return strToEl(`
-                                <div class="${classes.item} ${classes.itemChoice} ${data.disabled ? classes.itemDisabled : classes.itemSelectable}" 
-                                     data-select-text="" data-choice 
-                                     ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : "data-choice-selectable"} 
-                                     data-id="${data.id}" data-value="${data.value}" role="option">
-                                    <div class="flex items-center">
-                                        ${data.placeholder ? '' : `<img src="${avatar}" class="filter-avatar w-6 h-6 mr-3">`}
-                                        <span>${data.label}</span>
-                                    </div>
-                                </div>
-                            `);
-                        }
-                    };
-                };
-
-                // Initialize Choices selectors
-                const specialtyChoice = new Choices('#filterSpecialty', { 
-                    searchEnabled: true, itemSelectText: '', allowHTML: true,
-                    placeholder: true, placeholderValue: 'Tất cả chuyên khoa',
-                    searchPlaceholderValue: 'Tìm chuyên khoa...',
-                    callbackOnCreateTemplates: createPremiumTemplates
-                });
-
-                const hospitalChoice = new Choices('#filterHospital', { 
-                    searchEnabled: true, itemSelectText: '', allowHTML: true,
-                    placeholder: true, placeholderValue: 'Tất cả bệnh viện',
-                    searchPlaceholderValue: 'Tìm bệnh viện...',
-                    callbackOnCreateTemplates: createPremiumTemplates
-                });
-
-                const genderChoice = new Choices('#filterGender', { 
-                    searchEnabled: false, itemSelectText: '', allowHTML: true,
-                    placeholder: true, placeholderValue: 'Tất cả giới tính'
-                });
-
-                // Load Filter Data
-                const allSpecialtyAvatar = 'https://ui-avatars.com/api/?name=ALL&background=f1f5f9&color=64748b&bold=true';
-                fetch('/api/v1/specialties/search')
-                    .then(res => res.json())
-                    .then(data => {
-                        const choices = data.map(s => ({ value: s.id, label: s.name, customProperties: { avatar: s.imageUrl } }));
-                        specialtyChoice.setChoices([{ value: '', label: 'Tất cả chuyên khoa', selected: true, customProperties: { avatar: allSpecialtyAvatar } }, ...choices], 'value', 'label', true);
-                    });
-
-                const allHospitalAvatar = 'https://ui-avatars.com/api/?name=ALL&background=f1f5f9&color=64748b&bold=true';
-                fetch('/api/v1/hospitals/search')
-                    .then(res => res.json())
-                    .then(data => {
-                        const choices = data.map(h => ({ value: h.id, label: h.name, customProperties: { avatar: h.imageUrl } }));
-                        hospitalChoice.setChoices([{ value: '', label: 'Tất cả bệnh viện', selected: true, customProperties: { avatar: allHospitalAvatar } }, ...choices], 'value', 'label', true);
-                    });
-
                 const table = $('#doctorTable').DataTable({
+                    autoWidth: false,
                     serverSide: true,
                     processing: true,
                     paging: true,
@@ -206,71 +89,108 @@
                         url: "/api/v1/doctors/list-datatable",
                         data: function (d) {
                             d.keyword = $('#idKeyword').val();
-                            d.specialtyId = $('#filterSpecialty').val();
-                            d.hospitalId = $('#filterHospital').val();
-                            d.gender = $('#filterGender').val();
                         }
                     },
                     language: {
-                        processing: 'Đang xử lý...',
+                        processing: 'Đang kết nối...',
                         info: 'Hiển thị <b>_START_</b> đến <b>_END_</b> / <b>_TOTAL_</b>',
                         paginate: { next: '<i class="ri-arrow-right-s-line"></i>', previous: '<i class="ri-arrow-left-s-line"></i>' }
                     },
                     columns: [
-                        { title: "STT", data: null, className: "text-center text-slate-400 font-bold", width: "50px", render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } },
-                        { title: "Bác sĩ", data: "name", render: function(data, type, row) {
-                                var avatar = row.imageUrl ? row.imageUrl : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data) + '&background=f0f9ff&color=0284c7&bold=true';
-                                return '<div class="flex items-center"><div class="avatar-premium mr-4 border border-slate-100"><img src="' + avatar + '" class="w-full h-full object-cover"></div><div><div class="font-extrabold text-slate-800 text-sm">' + data + '</div><div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider">' + (row.gender || 'N/A') + '</div></div></div>';
-                        } },
-                        { title: "Chuyên khoa", data: "specialty", render: function(data) {
-                                if(!data) return '<span class="text-slate-300 italic text-xs">Chưa cập nhật</span>';
-                                var icon = data.imageUrl ? data.imageUrl : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.name) + '&background=f8fafc&color=64748b&bold=true';
-                                return '<div class="flex items-center gap-2"><img src="' + icon + '" class="w-6 h-6 rounded-md object-cover border border-slate-100 shadow-sm"><span class="font-bold text-slate-700 text-xs">' + data.name + '</span></div>';
-                        } },
-                        { title: "Cơ sở công tác", data: "hospitals", render: function(data) {
-                                if(!data || data.length === 0) return '<span class="text-slate-300 italic text-xs">Chưa cập nhật</span>';
-                                var html = '<div class="flex flex-wrap gap-2">';
-                                data.forEach(function(h) {
-                                    var logo = h.imageUrl ? h.imageUrl : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(h.name) + '&background=f1f5f9&color=64748b';
-                                    html += '<div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 shadow-sm"><img src="' + logo + '" class="w-5 h-5 rounded-md object-cover"><span class="text-[10px] font-bold text-slate-600">' + h.name + '</span></div>';
-                                });
-                                html += '</div>';
-                                return html;
-                        } },
-                        { title: "Đánh giá", data: "rating", className: "text-center", width: "120px", render: function(data) {
-                                var val = parseFloat(data || 5.0);
-                                var stars = '';
-                                for(var i=1; i<=5; i++) {
-                                    if(i <= Math.floor(val)) stars += '<i class="ri-star-fill text-amber-400"></i>';
-                                    else if(i - 0.5 <= val) stars += '<i class="ri-star-half-fill text-amber-400"></i>';
-                                    else stars += '<i class="ri-star-line text-slate-300"></i>';
+                        { 
+                            title: "STT", 
+                            width: "7%",
+                            data: null, 
+                            className: "text-center text-slate-400 font-bold", 
+                            render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } 
+                        },
+                        { 
+                            title: "Ảnh", 
+                            data: "imageUrl", 
+                            width: "10%",
+                            orderable: false,
+                            className: "text-center",
+                            render: function(data, type, row) {
+                                if (data && data.trim() !== '') {
+                                    return '<img src="' + data + '" class="avatar-premium object-cover border-2 border-brand-100 mx-auto shadow-sm">';
+                                } else {
+                                    var initials = (row.name && row.name.length > 0) ? row.name.charAt(0) : '?';
+                                    return '<div class="avatar-premium text-brand-600 mx-auto">' + initials + '</div>';
                                 }
-                                return '<div class="flex flex-col items-center gap-1"><div class="flex text-sm">' + stars + '</div><span class="text-[10px] font-black text-slate-400">' + val.toFixed(1) + ' / 5.0</span></div>';
-                        } },
-                        { title: "Liên hệ", data: "phone", render: function(data, type, row) {
-                                return '<div class="flex flex-col gap-1"><div><i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + (data || 'N/A') + '</div><div class="text-[11px] text-slate-400 font-medium"><i class="ri-mail-line mr-1.5 text-slate-400 text-xs"></i>' + (row.email || 'N/A') + '</div></div>';
-                        } },
-                        { title: "Thao tác", data: null, orderable: false, className: "text-right", render: function(data, type, row) {
-                                return '<div class="flex justify-end space-x-1"><a href="/doctors/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"><i class="ri-edit-2-line text-lg"></i></a><button onclick="deleteDoctor(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><i class="ri-delete-bin-line text-lg"></i></button></div>';
-                        } }
+                            }
+                        },
+                        { 
+                            title: "Bác sĩ", 
+                            data: "name", 
+                            width: "20%",
+                            render: function(data, type, row) {
+                                var specialtyName = row.specialty ? row.specialty.name : 'Chưa cập nhật';
+                                return '<div class="overflow-hidden">' +
+                                       '<div class="font-extrabold text-slate-800 text-sm truncate">' + data + '</div>' +
+                                       '<div class="text-[10px] text-brand-600 font-bold uppercase tracking-wider mt-1 truncate">' + specialtyName + '</div>' +
+                                       '</div>';
+                            } 
+                        },
+                        { 
+                            title: "Kinh nghiệm", 
+                            data: "experience",
+                            width: "25%",
+                            render: function(data) { return '<div class="truncate">' + (data || 'N/A') + '</div>'; }
+                        },
+                        { 
+                            title: "Liên hệ", 
+                            data: "phone", 
+                            width: "20%",
+                            render: function(data, type, row) {
+                                return '<div class="flex flex-col gap-1 overflow-hidden">' +
+                                       '<div class="flex items-center text-slate-700 font-bold truncate">' +
+                                       '<i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + (data || 'N/A') +
+                                       '</div>' +
+                                       '<div class="flex items-center text-[11px] text-slate-400 font-medium truncate">' +
+                                       '<i class="ri-mail-line mr-1.5 text-slate-400 text-xs text-opacity-50"></i>' + (row.email || 'N/A') +
+                                       '</div>' +
+                                       '</div>';
+                            } 
+                        },
+                        { 
+                            title: "Đánh giá", 
+                            data: "rating", 
+                            width: "8%",
+                            className: "text-center",
+                            render: function(data) {
+                                return '<div class="flex items-center justify-center text-amber-500 font-black"><i class="ri-star-fill mr-1"></i>' + (data || '0.0') + '</div>';
+                            } 
+                        },
+                        { 
+                            title: "Thao tác", 
+                            data: null, 
+                            width: "10%",
+                            orderable: false, 
+                            className: "text-right", 
+                            render: function(data, type, row) {
+                                return '<div class="flex justify-end space-x-1">' +
+                                       '<a href="/doctors/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Sửa">' +
+                                       '<i class="ri-edit-2-line text-lg"></i>' +
+                                       '</a>' +
+                                       '<button onclick="deleteDoctor(\'' + row.id + '\')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">' +
+                                       '<i class="ri-delete-bin-line text-lg"></i>' +
+                                       '</button>' +
+                                       '</div>';
+                            } 
+                        }
                     ],
-                    drawCallback: function() { $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' bác sĩ'); }
+                    drawCallback: function() { 
+                        $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' kết quả');
+                    }
                 });
 
-                // Event Listeners
                 $('#idKeyword').on('keyup', function() { table.draw(); });
-                $('#filterSpecialty, #filterHospital, #filterGender').on('change', function() { table.draw(); });
-                $('#btnRefresh').on('click', function() { $('#idKeyword').val(''); table.draw(); });
-                
-                $('#btnClearFilters').on('click', function() {
-                    $('#idKeyword').val('');
-                    specialtyChoice.setChoiceByValue('');
-                    hospitalChoice.setChoiceByValue('');
-                    genderChoice.setChoiceByValue('');
-                    table.draw();
-                });
             });
-            function deleteDoctor(id) { if(confirm('Bạn có chắc chắn muốn xóa bác sĩ này?')) { window.location.href = '/doctors/delete/' + id; } }
+            function deleteDoctor(id) { 
+                if(confirm('Bạn có chắc chắn muốn xóa bác sĩ này?')) { 
+                    window.location.href = '/doctors/delete/' + id; 
+                } 
+            }
         </script>
     </th:block>
 </body>

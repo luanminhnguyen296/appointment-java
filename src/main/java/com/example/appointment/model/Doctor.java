@@ -1,10 +1,7 @@
 package com.example.appointment.model;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,30 +25,24 @@ public class Doctor {
     @Column(nullable = false)
     private String name;
 
+    private String phone;
+    private String email;
+    private String experience;
+    private double rating;
+    private String description;
+    
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToOne
     @JoinColumn(name = "specialty_id")
     private Specialty specialty;
-
-    private String phone;
-    private String email;
-    private String gender; // Nam, Nữ, Khác
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate dateOfBirth;
-    private String imageUrl; // URL of the profile image
 
     @ManyToMany
     @JoinTable(name = "doctor_hospitals", joinColumns = @JoinColumn(name = "doctor_id"), inverseJoinColumns = @JoinColumn(name = "hospital_id"))
     private List<Hospital> hospitals = new ArrayList<>();
 
-    @Column(name = "rating")
-    private Double rating = 5.0; // Mặc định 5 sao
-
     public Doctor() {
-    }
-
-    public Doctor(String name, Specialty specialty) {
-        this.name = name;
-        this.specialty = specialty;
     }
 
     // Getters and Setters
@@ -71,14 +62,6 @@ public class Doctor {
         this.name = name;
     }
 
-    public Specialty getSpecialty() {
-        return specialty;
-    }
-
-    public void setSpecialty(Specialty specialty) {
-        this.specialty = specialty;
-    }
-
     public String getPhone() {
         return phone;
     }
@@ -95,20 +78,28 @@ public class Doctor {
         this.email = email;
     }
 
-    public String getGender() {
-        return gender;
+    public String getExperience() {
+        return experience;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setExperience(String experience) {
+        this.experience = experience;
     }
 
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
+    public double getRating() {
+        return rating;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getImageUrl() {
@@ -119,19 +110,19 @@ public class Doctor {
         this.imageUrl = imageUrl;
     }
 
+    public Specialty getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(Specialty specialty) {
+        this.specialty = specialty;
+    }
+
     public List<Hospital> getHospitals() {
         return hospitals;
     }
 
     public void setHospitals(List<Hospital> hospitals) {
         this.hospitals = hospitals;
-    }
-
-    public Double getRating() {
-        return rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
     }
 }

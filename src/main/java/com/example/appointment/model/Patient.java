@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -18,6 +20,7 @@ import jakarta.persistence.Table;
 public class Patient {
 
 	@Id
+	@JsonSerialize(using = ToStringSerializer.class)
 	private Long id;
 
 	@Column(nullable = false)

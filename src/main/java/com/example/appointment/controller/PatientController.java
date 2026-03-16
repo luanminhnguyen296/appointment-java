@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import com.example.appointment.model.Patient;
-import com.example.appointment.service.FileService;
+
 import com.example.appointment.service.PatientService;
 import com.example.appointment.utils.SnowflakeIdGenerator;
 
@@ -31,8 +31,7 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
 
-    @Autowired
-    private FileService fileService;
+
 
     @GetMapping("/patients")
     public String listPatients() {
@@ -49,27 +48,15 @@ public class PatientController {
     }
 
     @PostMapping("/patients/save")
-    public String savePatient(@ModelAttribute Patient patient,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+    public String savePatient(@ModelAttribute Patient patient) {
         try {
             // 0. Generate Snowflake ID for new patients
             if (patient.getId() == null) {
                 patient.setId(SnowflakeIdGenerator.nextId());
             }
 
-            // 1. Xử lý Ảnh đại diện
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = fileService.saveFile(imageFile);
-                patient.setImageUrl(imageUrl);
-            } else if (patient.getId() != null) {
-                // Nếu không tải ảnh mới, giữ lại ảnh cũ từ form hoặc DB
-                if (patient.getImageUrl() == null || patient.getImageUrl().isEmpty()) {
-                    Patient existing = patientService.getPatientById(patient.getId());
-                    if (existing != null) {
-                        patient.setImageUrl(existing.getImageUrl());
-                    }
-                }
-            }
+            // 1. Logic for image has been simplified to direct URL input in form
+            // No additional processing needed as the model attribute handles it.
 
             // 2. Xử lý Bệnh lý nền (Fix lỗi Choices.js gửi mảng gộp chuỗi)
             List<String> rawConditions = patient.getMedicalCondition();

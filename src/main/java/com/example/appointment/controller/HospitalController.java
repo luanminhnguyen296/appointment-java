@@ -1,6 +1,5 @@
 package com.example.appointment.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.appointment.model.Hospital;
-import com.example.appointment.service.FileService;
 import com.example.appointment.service.HospitalService;
 
 @Controller
@@ -29,9 +26,6 @@ public class HospitalController {
 
     @Autowired
     private HospitalService hospitalService;
-
-    @Autowired
-    private FileService fileService;
 
     @GetMapping("/hospitals")
     public String listHospitals() {
@@ -45,23 +39,8 @@ public class HospitalController {
     }
 
     @PostMapping("/hospitals/save")
-    public String saveHospital(@ModelAttribute Hospital hospital,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
-        try {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = fileService.saveFile(imageFile);
-                hospital.setImageUrl(imageUrl);
-            } else if (hospital.getId() != null) {
-                // If editing and no new file, keep current image
-                Hospital existing = hospitalService.getHospitalById(hospital.getId());
-                if (hospital.getImageUrl() == null || hospital.getImageUrl().isEmpty()) {
-                    hospital.setImageUrl(existing.getImageUrl());
-                }
-            }
-            hospitalService.saveHospital(hospital);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public String saveHospital(@ModelAttribute Hospital hospital) {
+        hospitalService.saveHospital(hospital);
         return "redirect:/hospitals";
     }
 

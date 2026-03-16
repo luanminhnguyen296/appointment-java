@@ -7,15 +7,15 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
         <style>
             .dataTables_wrapper .dataTables_filter { display: none; }
+            table.dataTable { width: 100% !important; table-layout: fixed !important; }
             table.dataTable thead th { 
                 background: #f8fafc !important; color: #64748b !important; 
                 font-weight: 800 !important; text-transform: uppercase !important; 
                 font-size: 11px !important; border-bottom: 1px solid #f1f5f9 !important;
-                padding: 16px 24px !important;
-                white-space: nowrap;
+                padding: 16px 12px !important;
             }
             table.dataTable tbody td { 
-                padding: 16px 24px !important; 
+                padding: 16px 12px !important; 
                 border-bottom: 1px solid #f1f5f9 !important;
                 vertical-align: middle;
             }
@@ -24,27 +24,7 @@
                 background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); font-weight: 800; border: 1px solid #bae6fd;
                 flex-shrink: 0;
             }
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-            @media (min-width: 768px) {
-                .premium-card { padding: 2rem; }
-            }
-            
-            /* Custom Scrollbar for Table */
-            .table-responsive::-webkit-scrollbar { height: 6px; }
-            .table-responsive::-webkit-scrollbar-track { background: #f1f5f9; }
-            .table-responsive::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-            
-            /* DataTables Processing Overlay Customization */
-            .dataTables_processing {
-                background: rgba(255, 255, 255, 0.9) !important;
-                border: none !important;
-                box-shadow: none !important;
-                color: #0284c7 !important;
-                font-weight: 800 !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.1em !important;
-                font-size: 11px !important;
-            }
+            .premium-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         </style>
     </th:block>
 </head>
@@ -61,9 +41,6 @@
                 <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Quản lý toàn diện danh sách bệnh nhân MediHub.</p>
             </div>
             <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                <button id="btnRefresh" class="flex-1 lg:flex-none bg-white border border-slate-200 text-slate-600 px-5 py-3 rounded-xl hover:bg-slate-50 transition shadow-sm font-bold text-sm flex items-center justify-center">
-                    <i class="ri-refresh-line mr-2"></i> <span class="hidden sm:inline">Làm mới</span>
-                </button>
                 <a href="/patients/new" class="flex-1 lg:flex-none bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition shadow-lg font-extrabold text-sm flex items-center justify-center">
                     <i class="ri-user-add-line mr-2"></i> <span>Thêm <span class="hidden sm:inline">bệnh nhân</span></span>
                 </a>
@@ -95,21 +72,23 @@
         </div>
 
         <!-- Table Container -->
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-            <div class="table-responsive overflow-x-auto">
-                <table id="patientTable" class="w-full text-sm min-w-[800px]"></table>
+        <div class="bg-white rounded-[1rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="table-responsive">
+                <table id="patientTable" class="w-full text-sm border-collapse"></table>
             </div>
         </div>
     </th:block>
 
     <th:block th:fragment="script_part">
         <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
         <script th:inline="none">
             $(document).ready(function() {
                 var elGender = document.getElementById('idGender');
-                var genderChoices = elGender ? new Choices(elGender, { searchEnabled: false, itemSelectText: '', allowHTML: true }) : null;
+                if (elGender) new Choices(elGender, { searchEnabled: false, itemSelectText: '', allowHTML: true });
 
                 const table = $('#patientTable').DataTable({
+                    autoWidth: false,
                     serverSide: true,
                     processing: true,
                     paging: true,
@@ -134,14 +113,14 @@
                         { 
                             title: "STT", 
                             data: null, 
-                            width: "50px", 
+                            width: "6%", 
                             className: "text-center text-slate-400 font-bold", 
                             render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } 
                         },
                         { 
                             title: "Ảnh", 
                             data: "imageUrl", 
-                            width: "70px",
+                            width: "8%",
                             orderable: false,
                             className: "text-center",
                             render: function(data, type, row) {
@@ -156,35 +135,37 @@
                         { 
                             title: "Bệnh nhân", 
                             data: "fullName", 
+                            width: "20%",
                             render: function(data, type, row) {
-                                return '<div>' +
-                                       '<div class="font-extrabold text-slate-800 text-sm whitespace-nowrap">' + data + '</div>' +
-                                       '<div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Mã BN: #' + row.id + '</div>' +
+                                return '<div class="overflow-hidden">' +
+                                       '<div class="font-extrabold text-slate-800 text-sm truncate">' + data + '</div>' +
+                                       '<div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1 truncate">Mã BN: #' + row.id + '</div>' +
                                        '</div>';
                             } 
                         },
                         { 
-                            title: "Bệnh lý nền", 
+                            title: "Bệnh lý", 
                             data: "medicalCondition", 
-                            width: "200px",
+                            width: "20%",
                             render: function(data) {
                                 if (Array.isArray(data) && data.length > 0) {
-                                    return '<div class="flex flex-wrap gap-1">' +
-                                           data.map(cond => '<span class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-md text-[10px] font-bold">' + cond + '</span>').join('') +
+                                    return '<div class="flex flex-wrap gap-1 overflow-hidden max-h-12">' +
+                                           data.map(cond => '<span class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-md text-[10px] font-bold truncate">' + cond + '</span>').join('') +
                                            '</div>';
                                 }
-                                return '<span class="text-slate-300 text-[10px] italic">Chưa ghi nhận</span>';
+                                return '<span class="text-slate-300 text-[10px] italic">N/A</span>';
                             }
                         },
                         { 
                             title: "Liên hệ", 
                             data: "phone", 
+                            width: "20%",
                             render: function(data, type, row) {
-                                return '<div class="flex flex-col gap-1 min-w-[150px]">' +
-                                       '<div class="flex items-center text-slate-700 font-bold">' +
-                                       '<i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + data +
+                                return '<div class="flex flex-col gap-1 overflow-hidden">' +
+                                       '<div class="flex items-center text-slate-700 font-bold truncate">' +
+                                       '<i class="ri-phone-line mr-1.5 text-brand-500 text-xs"></i>' + (data || 'N/A') +
                                        '</div>' +
-                                       '<div class="flex items-center text-[11px] text-slate-400 font-medium">' +
+                                       '<div class="flex items-center text-[11px] text-slate-400 font-medium truncate">' +
                                        '<i class="ri-mail-line mr-1.5 text-slate-400 text-xs text-opacity-50"></i>' + (row.email || 'N/A') +
                                        '</div>' +
                                        '</div>';
@@ -193,16 +174,17 @@
                         { 
                             title: "Giới tính", 
                             data: "gender", 
-                            width: "100px", 
+                            width: "12%", 
                             className: "text-center",
                             render: function(data) {
                                 var badgeClass = data === 'Nữ' ? 'bg-pink-50 text-pink-600' : (data === 'Nam' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-600');
-                                return '<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ' + badgeClass + '">' + (data || 'N/A') + '</span>';
+                                return '<span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ' + badgeClass + '">' + (data || 'N/A') + '</span>';
                             } 
                         },
                         { 
                             title: "Thao tác", 
                             data: null, 
+                            width: "14%", 
                             orderable: false, 
                             className: "text-right", 
                             render: function(data, type, row) {
@@ -213,7 +195,7 @@
                                        '<a href="/patients/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Sửa">' +
                                        '<i class="ri-edit-2-line text-lg"></i>' +
                                        '</a>' +
-                                       '<button onclick="deletePatient(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">' +
+                                       '<button onclick="deletePatient(\'' + row.id + '\')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">' +
                                        '<i class="ri-delete-bin-line text-lg"></i>' +
                                        '</button>' +
                                        '</div>';
@@ -222,18 +204,11 @@
                     ],
                     drawCallback: function() { 
                         $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' kết quả');
-                        // Add nice subtle fade in
-                        $('#patientTable tbody').addClass('animate-in fade-in duration-500');
                     }
                 });
 
                 $('#idKeyword').on('keyup', function() { table.draw(); });
                 $('#idGender').on('change', function() { table.draw(); });
-                $('#btnRefresh').on('click', function() { 
-                    $('#idKeyword').val(''); 
-                    if (genderChoices) genderChoices.setChoiceByValue(''); 
-                    table.draw(); 
-                });
             });
             function deletePatient(id) { 
                 if(confirm('Bạn có chắc chắn muốn xóa bệnh nhân này?')) { 

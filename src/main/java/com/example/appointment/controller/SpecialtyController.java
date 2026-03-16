@@ -1,6 +1,5 @@
 package com.example.appointment.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.appointment.model.Specialty;
-import com.example.appointment.service.FileService;
 import com.example.appointment.service.SpecialtyService;
 
 @Controller
@@ -29,9 +26,6 @@ public class SpecialtyController {
 
     @Autowired
     private SpecialtyService specialtyService;
-
-    @Autowired
-    private FileService fileService;
 
     @GetMapping("/specialties")
     public String listSpecialties() {
@@ -45,22 +39,8 @@ public class SpecialtyController {
     }
 
     @PostMapping("/specialties/save")
-    public String saveSpecialty(@ModelAttribute Specialty specialty,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
-        try {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = fileService.saveFile(imageFile);
-                specialty.setImageUrl(imageUrl);
-            } else if (specialty.getId() != null) {
-                Specialty existing = specialtyService.getSpecialtyById(specialty.getId());
-                if (specialty.getImageUrl() == null || specialty.getImageUrl().isEmpty()) {
-                    specialty.setImageUrl(existing.getImageUrl());
-                }
-            }
-            specialtyService.saveSpecialty(specialty);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public String saveSpecialty(@ModelAttribute Specialty specialty) {
+        specialtyService.saveSpecialty(specialty);
         return "redirect:/specialties";
     }
 
@@ -102,7 +82,6 @@ public class SpecialtyController {
     @GetMapping("/api/v1/specialties/search")
     @ResponseBody
     public List<Specialty> searchSpecialties(@RequestParam(value = "q", required = false) String query) {
-        // For simplicity, using a small page or creating a new search method
         Pageable pageable = PageRequest.of(0, 20, Sort.by("name").ascending());
         return specialtyService.getSpecialtiesDatatable(query, pageable).getContent();
     }

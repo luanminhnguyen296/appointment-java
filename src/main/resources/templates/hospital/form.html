@@ -5,7 +5,8 @@
     <title th:text="${hospital.id == null ? 'Thêm mới' : 'Cập nhật'} + ' cơ sở | MediAdmin'"></title>
     <th:block th:fragment="head_part">
         <style>
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 2.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+            .premium-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+            input:focus, select:focus, textarea:focus { border-color: #0284c7 !important; background: white !important; }
         </style>
     </th:block>
 </head>
@@ -25,25 +26,28 @@
             </div>
 
             <div class="premium-card">
-                <form th:action="@{/hospitals/save}" th:object="${hospital}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <form th:action="@{/hospitals/save}" th:object="${hospital}" method="POST" class="space-y-8">
                     <input type="hidden" th:field="*{id}" />
-                    <input type="hidden" th:field="*{imageUrl}" id="imageUrlHidden" />
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Avatar Section -->
-                        <div class="md:col-span-2 flex items-center space-x-6 bg-slate-50 p-6 rounded-[2rem] border border-dashed border-slate-200">
-                            <div class="relative group">
-                                <img id="previewAvatar" th:src="${hospital.imageUrl != null && hospital.imageUrl != '' ? hospital.imageUrl : 'https://ui-avatars.com/api/?name=Hospital&background=f0f9ff&color=0284c7&bold=true'}" 
-                                     class="w-24 h-24 rounded-3xl object-cover border-4 border-white shadow-xl" alt="Hospital Avatar">
-                                <label for="imageFile" class="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold cursor-pointer">
-                                    <i class="ri-image-edit-line text-2xl"></i>
-                                </label>
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ảnh đại diện/Logo bệnh viện</label>
-                                <input type="file" name="imageFile" id="imageFile" accept="image/*"
-                                       class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
-                                <p class="text-[9px] text-slate-400 mt-2 font-medium italic">Tải lên file ảnh (JPG, PNG, WebP) làm logo hiển thị.</p>
+                        <!-- Image URL Input -->
+                        <div class="md:col-span-2 space-y-3">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Đường dẫn ảnh/Logo (URL)</label>
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="w-full md:w-32">
+                                    <div class="aspect-square bg-slate-50 border-2 border-slate-100 rounded-3xl overflow-hidden flex items-center justify-center relative group">
+                                        <img id="previewAvatar" 
+                                             th:src="${hospital.imageUrl != null && hospital.imageUrl != '' ? hospital.imageUrl : 'https://ui-avatars.com/api/?name=Hospital&background=f0f9ff&color=0284c7&bold=true'}" 
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                </div>
+
+                                <!-- Input Box -->
+                                <div class="flex-1 flex flex-col justify-center space-y-2">
+                                    <input type="text" th:field="*{imageUrl}" id="imageUrlInput" placeholder="https://example.com/logo.png"
+                                           class="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-300 outline-none font-bold text-sm transition-all">
+                                    <p class="text-[9px] text-slate-400 font-medium italic">Dán URL ảnh để làm logo cho bệnh viện.</p>
+                                </div>
                             </div>
                         </div>
 
@@ -86,19 +90,21 @@
     </th:block>
 
     <th:block th:fragment="script_part">
-        <script th:inline="none">
-            $(document).ready(function() {
-                // Avatar Preview Logic
-                $('#imageFile').on('change', function() {
-                    const file = this.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            $('#previewAvatar').attr('src', e.target.result);
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const imageUrlInput = document.getElementById('imageUrlInput');
+                const previewAvatar = document.getElementById('previewAvatar');
+
+                if (imageUrlInput) {
+                    imageUrlInput.addEventListener('input', function() {
+                        const url = this.value.trim();
+                        if (url) {
+                            previewAvatar.src = url;
+                        } else {
+                            previewAvatar.src = 'https://ui-avatars.com/api/?name=Hospital&background=f0f9ff&color=0284c7&bold=true';
                         }
-                        reader.readAsDataURL(file);
-                    }
-                });
+                    });
+                }
             });
         </script>
     </th:block>

@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, null)}">
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, '/specialties')}">
 <head>
     <title>Chuyên khoa | MediAdmin</title>
     <th:block th:fragment="head_part">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
         <style>
             .dataTables_wrapper .dataTables_filter { display: none; }
+            table.dataTable { width: 100% !important; table-layout: fixed !important; }
             table.dataTable thead th { 
                 background: #f8fafc !important; color: #64748b !important; 
                 font-weight: 800 !important; text-transform: uppercase !important; 
                 font-size: 11px !important; border-bottom: 1px solid #f1f5f9 !important;
-                padding: 16px 24px !important;
-                white-space: nowrap;
+                padding: 16px 12px !important;
             }
             table.dataTable tbody td { 
-                padding: 16px 24px !important; 
+                padding: 16px 12px !important; 
                 border-bottom: 1px solid #f1f5f9 !important;
                 vertical-align: middle;
             }
@@ -23,7 +23,7 @@
                 width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
                 background: #fdf2f2; border: 1px solid #fee2e2; overflow: hidden;
             }
-            .premium-card { background: white; border-radius: 2rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+            .premium-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         </style>
     </th:block>
 </head>
@@ -61,9 +61,9 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-            <div class="table-responsive overflow-x-auto px-1">
-                <table id="specialtyTable" class="w-full text-sm min-w-[700px]"></table>
+        <div class="bg-white rounded-[1rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="table-responsive">
+                <table id="specialtyTable" class="w-full text-sm border-collapse"></table>
             </div>
         </div>
     </th:block>
@@ -73,6 +73,7 @@
         <script th:inline="none">
             $(document).ready(function() {
                 const table = $('#specialtyTable').DataTable({
+                    autoWidth: false,
                     serverSide: true,
                     processing: true,
                     paging: true,
@@ -91,24 +92,60 @@
                         paginate: { next: '<i class="ri-arrow-right-s-line"></i>', previous: '<i class="ri-arrow-left-s-line"></i>' }
                     },
                     columns: [
-                        { title: "STT", data: null, width: "60px", className: "text-center text-slate-400 font-bold", render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } },
-                        { title: "Chuyên khoa", data: "name", render: function(data, type, row) {
-                                var icon = row.imageUrl ? row.imageUrl : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data) + '&background=fef2f2&color=ef4444&bold=true';
-                                return '<div class="flex items-center"><div class="avatar-specialty mr-4"><img src="' + icon + '" class="w-full h-full object-cover"></div><div class="font-extrabold text-slate-800">' + data + '</div></div>';
-                        } },
-                        { title: "Mô tả", data: "description", render: function(data) {
-                                return '<div class="text-slate-500 font-medium max-w-sm truncate">' + (data || 'N/A') + '</div>';
-                        } },
-                        { title: "Thao tác", data: null, orderable: false, className: "text-right", render: function(data, type, row) {
-                                return '<div class="flex justify-end space-x-1"><a href="/specialties/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition"><i class="ri-edit-2-line text-lg"></i></a><button onclick="deleteSpecialty(' + row.id + ')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><i class="ri-delete-bin-line text-lg"></i></button></div>';
-                        } }
+                        { 
+                            title: "STT", 
+                            width: "3%",
+                            data: null, 
+                            className: "text-center text-slate-400 font-bold", 
+                            render: function(data, type, row, meta) { return meta.settings._iDisplayStart + meta.row + 1; } 
+                        },
+                        { 
+                            title: "Chuyên khoa", 
+                            data: "name", 
+                            width: "30%",
+                            render: function(data, type, row) {
+                                var icon = row.imageUrl ? row.imageUrl : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data) + '&background=fdf2f2&color=ef4444&bold=true';
+                                return '<div class="flex items-center overflow-hidden"><div class="avatar-specialty mr-3 shrink-0"><img src="' + icon + '" class="w-full h-full object-cover"></div><div class="font-extrabold text-slate-800 truncate">' + data + '</div></div>';
+                            } 
+                        },
+                        { 
+                            title: "Mô tả", 
+                            width: "47%",
+                            data: "description", 
+                            render: function(data) {
+                                return '<div class="text-slate-500 font-medium truncate">' + (data || 'N/A') + '</div>';
+                            } 
+                        },
+                        { 
+                            title: "Thao tác", 
+                            width: "15%",
+                            data: null, 
+                            orderable: false, 
+                            className: "text-right", 
+                            render: function(data, type, row) {
+                                return '<div class="flex justify-end space-x-1">' +
+                                       '<a href="/specialties/edit/' + row.id + '" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Sửa">' +
+                                       '<i class="ri-edit-2-line text-lg"></i>' +
+                                       '</a>' +
+                                       '<button onclick="deleteSpecialty(\'' + row.id + '\')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">' +
+                                       '<i class="ri-delete-bin-line text-lg"></i>' +
+                                       '</button>' +
+                                       '</div>';
+                            } 
+                        }
                     ],
-                    drawCallback: function() { $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' chuyên khoa'); }
+                    drawCallback: function() { 
+                        $('#resultsCount').text('Tìm thấy ' + this.api().page.info().recordsDisplay + ' chuyên khoa'); 
+                    }
                 });
 
                 $('#idKeyword').on('keyup', function() { table.draw(); });
             });
-            function deleteSpecialty(id) { if(confirm('Bạn có chắc chắn muốn xóa chuyên khoa này?')) { window.location.href = '/specialties/delete/' + id; } }
+            function deleteSpecialty(id) { 
+                if(confirm('Bạn có chắc chắn muốn xóa chuyên khoa này?')) { 
+                    window.location.href = '/specialties/delete/' + id; 
+                } 
+            }
         </script>
     </th:block>
 </body>

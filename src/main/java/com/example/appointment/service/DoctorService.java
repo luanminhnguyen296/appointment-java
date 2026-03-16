@@ -32,9 +32,7 @@ public class DoctorService {
         doctorRepository.deleteById(id);
     }
 
-    public Page<Doctor> getDoctorsDatatable(String keyword, Long specialtyId, Long hospitalId, String gender,
-            Pageable pageable) {
-        String searchKeyword = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
-        return doctorRepository.findWithFilters(searchKeyword, specialtyId, hospitalId, gender, pageable);
+    public Page<Doctor> getDoctorsDatatable(String keyword, Pageable pageable) {
+        return doctorRepository.findByKeyword(keyword, pageable);
     }
 }
