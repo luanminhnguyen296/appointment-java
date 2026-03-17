@@ -64,5 +64,3 @@ Mở trình duyệt và truy cập:
 - `pom.xml`: Quản lý phụ thuộc (dependencies) của Maven.
 
 ---
-
-Phát triển bởi **Antigravity** 🚀
