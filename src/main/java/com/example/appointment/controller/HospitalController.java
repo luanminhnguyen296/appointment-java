@@ -11,10 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -38,10 +40,20 @@ public class HospitalController {
         return "hospital/form";
     }
 
-    @PostMapping("/hospitals/save")
-    public String saveHospital(@ModelAttribute Hospital hospital) {
+    @PostMapping("/hospitals/create")
+    @ResponseBody
+    public Hospital createHospital(@RequestBody Hospital hospital) {
+        hospital.setId(null);
         hospitalService.saveHospital(hospital);
-        return "redirect:/hospitals";
+        return hospital;
+    }
+
+    @PutMapping("/hospitals/update/{id}")
+    @ResponseBody
+    public Hospital updateHospital(@PathVariable Long id, @RequestBody Hospital hospital) {
+        hospital.setId(id);
+        hospitalService.saveHospital(hospital);
+        return hospital;
     }
 
     @GetMapping("/hospitals/edit/{id}")
@@ -51,10 +63,14 @@ public class HospitalController {
         return "hospital/form";
     }
 
-    @GetMapping("/hospitals/delete/{id}")
-    public String deleteHospital(@PathVariable Long id) {
+    @DeleteMapping("/hospitals/delete/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteHospital(@PathVariable Long id) {
         hospitalService.deleteHospital(id);
-        return "redirect:/hospitals";
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Xóa cơ sở thành công");
+        return response;
     }
 
     @GetMapping("/api/v1/hospitals/list-datatable")
@@ -84,5 +100,11 @@ public class HospitalController {
     public List<Hospital> searchHospitals(@RequestParam(value = "q", required = false) String query) {
         Pageable pageable = PageRequest.of(0, 20, Sort.by("name").ascending());
         return hospitalService.getHospitalsDatatable(query, pageable).getContent();
+    }
+
+    @GetMapping("/api/v1/hospitals/all")
+    @ResponseBody
+    public List<Hospital> getAllHospitals() {
+        return hospitalService.getAllHospitals();
     }
 }

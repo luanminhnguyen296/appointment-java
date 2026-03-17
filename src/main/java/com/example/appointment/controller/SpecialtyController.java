@@ -85,4 +85,10 @@ public class SpecialtyController {
         Pageable pageable = PageRequest.of(0, 20, Sort.by("name").ascending());
         return specialtyService.getSpecialtiesDatatable(query, pageable).getContent();
     }
+
+    @GetMapping("/api/v1/specialties/all")
+    @ResponseBody
+    public List<Specialty> getAllSpecialties() {
+        return specialtyService.getAllSpecialties();
+    }
 }

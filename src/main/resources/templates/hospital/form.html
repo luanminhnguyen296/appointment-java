@@ -90,6 +90,7 @@
     </th:block>
 
     <th:block th:fragment="script_part">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const imageUrlInput = document.getElementById('imageUrlInput');
@@ -105,6 +106,73 @@
                         }
                     });
                 }
+
+                // Handle Form AJAX Submission
+                const form = document.querySelector('form');
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        if (key === 'id' && value === '') {
+                            data[key] = null;
+                        } else {
+                            data[key] = value;
+                        }
+                    });
+
+                    // Log data to check (optional)
+                    console.log('Submitting data:', data);
+
+                    const isUpdate = data.id !== null;
+                    const url = isUpdate ? `/hospitals/update/${data.id}` : '/hospitals/create';
+                    const method = isUpdate ? 'PUT' : 'POST';
+
+                    fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công!',
+                                text: 'Dữ liệu cơ sở đã được lưu.',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                background: '#fff',
+                                color: '#1e293b',
+                                iconColor: '#0284c7',
+                                customClass: {
+                                    popup: 'rounded-3xl border-none shadow-2xl'
+                                }
+                            });
+                            
+                            setTimeout(() => {
+                                window.location.href = '/hospitals';
+                            }, 500);
+                        } else {
+                            throw new Error('Có lỗi xảy ra khi lưu dữ liệu');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Thất bại',
+                            text: error.message,
+                            background: '#fff',
+                            color: '#1e293b',
+                            confirmButtonColor: '#0284c7',
+                            customClass: {
+                                popup: 'rounded-3xl border-none shadow-2xl'
+                            }
+                        });
+                    });
+                });
             });
         </script>
     </th:block>

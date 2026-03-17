@@ -70,9 +70,8 @@
                         <!-- Specialty -->
                         <div>
                             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Chuyên khoa</label>
-                            <select th:field="*{specialty}" id="specialtySelect" class="w-full font-bold text-sm">
-                                <option value="">Chọn chuyên khoa...</option>
-                                <option th:each="s : ${specialties}" th:value="${s.id}" th:text="${s.name}"></option>
+                            <select id="specialtySelect" class="w-full font-bold text-sm">
+                                <option value="">Đang tải chuyên khoa...</option>
                             </select>
                         </div>
 
@@ -107,8 +106,8 @@
                         <!-- Hospitals -->
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Cơ sở công tác</label>
-                            <select th:field="*{hospitals}" id="hospitalsSelect" multiple class="w-full font-bold text-sm">
-                                <option th:each="h : ${hospitals}" th:value="${h.id}" th:text="${h.name}"></option>
+                            <select id="hospitalsSelect" multiple class="w-full font-bold text-sm">
+                                <!-- Options will be loaded via API -->
                             </select>
                         </div>
 
@@ -133,31 +132,127 @@
 
     <th:block th:fragment="script_part">
         <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', async function() {
+                // Get current values from Thymeleaf
+                const currentDoctorId = [[${doctor.id}]];
+                const currentSpecialtyId = [[${doctor.specialty?.id}]];
+                const currentHospitalIds = [[${doctor.hospitals != null ? doctor.hospitals.![id] : {}}]];
+
                 // Image Preview
                 const imageUrlInput = document.getElementById('imageUrlInput');
                 const imagePreview = document.getElementById('imagePreview');
                 const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
+                function updateImagePreview(url) {
+                    if (url) {
+                        imagePreview.src = url;
+                        imagePreview.style.display = 'block';
+                        uploadPlaceholder.style.display = 'none';
+                    } else {
+                        imagePreview.src = '';
+                        imagePreview.style.display = 'none';
+                        uploadPlaceholder.style.display = 'flex';
+                    }
+                }
+
                 if (imageUrlInput) {
                     imageUrlInput.addEventListener('input', function() {
-                        const url = this.value.trim();
-                        if (url) {
-                            imagePreview.src = url;
-                            imagePreview.style.display = 'block';
-                            uploadPlaceholder.style.display = 'none';
-                        } else {
-                            imagePreview.src = '';
-                            imagePreview.style.display = 'none';
-                            uploadPlaceholder.style.display = 'flex';
-                        }
+                        updateImagePreview(this.value.trim());
                     });
                 }
 
-                // Initialize Choices.js
-                new Choices('#specialtySelect', { searchEnabled: true, itemSelectText: '' });
-                new Choices('#hospitalsSelect', { removeItemButton: true, itemSelectText: '' });
+                // Initialize Choices
+                const specialtyChoices = new Choices('#specialtySelect', { searchEnabled: true, itemSelectText: '' });
+                const hospitalsChoices = new Choices('#hospitalsSelect', { removeItemButton: true, itemSelectText: '' });
+
+                // Load Specialties via API
+                try {
+                    const response = await fetch('/api/v1/specialties/all');
+                    const specialties = await response.json();
+                    
+                    const specOptions = specialties.map(s => ({
+                        value: s.id,
+                        label: s.name,
+                        selected: s.id == currentSpecialtyId
+                    }));
+                    
+                    specialtyChoices.clearChoices();
+                    specialtyChoices.setChoices([
+                        { value: '', label: 'Chọn chuyên khoa...', disabled: true, placeholder: true },
+                        ...specOptions
+                    ], 'value', 'label', true);
+                } catch (error) {
+                    console.error('Error loading specialties:', error);
+                }
+
+                // Load Hospitals via API
+                try {
+                    const response = await fetch('/api/v1/hospitals/all');
+                    const hospitals = await response.json();
+                    
+                    const hospOptions = hospitals.map(h => ({
+                        value: h.id,
+                        label: h.name,
+                        selected: currentHospitalIds.includes(h.id)
+                    }));
+                    
+                    hospitalsChoices.setChoices(hospOptions, 'value', 'label', true);
+                } catch (error) {
+                    console.error('Error loading hospitals:', error);
+                }
+
+                // Handle Form AJAX Submission
+                const form = document.querySelector('form');
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        if (key === 'id' && value === '') {
+                            data[key] = null;
+                        } else if (key !== 'specialty' && key !== 'hospitals') {
+                            data[key] = value;
+                        }
+                    });
+
+                    // Manual handle for specialty (get from Choices)
+                    const specId = specialtyChoices.getValue(true);
+                    data.specialty = specId ? { id: specId } : null;
+
+                    // Manual handle for hospitals (get from Choices)
+                    const hospIds = hospitalsChoices.getValue(true);
+                    data.hospitals = hospIds.map(id => ({ id: id }));
+
+                    const isUpdate = currentDoctorId !== null;
+                    const url = isUpdate ? `/doctors/update/${currentDoctorId}` : '/doctors/create';
+                    const method = isUpdate ? 'PUT' : 'POST';
+
+                    fetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công!',
+                                text: 'Thông tin bác sĩ đã được lưu.',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            setTimeout(() => window.location.href = '/doctors', 500);
+                        } else {
+                            throw new Error('Lỗi khi lưu dữ liệu');
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire('Thất bại', err.message, 'error');
+                    });
+                });
             });
         </script>
     </th:block>

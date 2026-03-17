@@ -70,6 +70,7 @@
 
     <th:block th:fragment="script_part">
         <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script th:inline="none">
             $(document).ready(function() {
                 const table = $('#hospitalTable').DataTable({
@@ -150,12 +151,55 @@
                 });
 
                 $('#idKeyword').on('keyup', function() { table.draw(); });
+                
+                // Expose deleteHospital to global scope for the onclick attribute
+                window.deleteHospital = function(id) {
+                    Swal.fire({
+                        title: 'Bạn có chắc chắn?',
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ea1a53',
+                        cancelButtonColor: '#f1f5f9',
+                        confirmButtonText: 'Có, xóa ngay!',
+                        cancelButtonText: 'Hủy',
+                        background: '#fff',
+                        color: '#1e293b',
+                        customClass: {
+                            popup: 'rounded-3xl border-none shadow-2xl',
+                            confirmButton: 'rounded-xl px-10 py-3 font-bold',
+                            cancelButton: 'rounded-xl px-10 py-3 font-bold text-slate-500'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('/hospitals/delete/' + id, {
+                                method: 'DELETE'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Đã xóa!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                        customClass: {
+                                            popup: 'rounded-3xl border-none shadow-2xl'
+                                        }
+                                    });
+                                    table.ajax.reload(null, false); // Reload table without resetting paging
+                                } else {
+                                    throw new Error(data.message || 'Có lỗi xảy ra');
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire('Lỗi!', error.message, 'error');
+                            });
+                        }
+                    });
+                };
             });
-            function deleteHospital(id) { 
-                if(confirm('Bạn có chắc chắn muốn xóa cơ sở này?')) { 
-                    window.location.href = '/hospitals/delete/' + id; 
-                } 
-            }
         </script>
     </th:block>
 </body>
