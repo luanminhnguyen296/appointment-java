@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::content_part}, ~{::head_part}, ~{::script_part}, ~{::breadcrumb_part}, '/users')}">
+<head>
+    <title>Quản lý Users | MediAdmin</title>
+    <th:block th:fragment="head_part">
+        <style>
+            .role-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+            .role-admin { background: #fef2f2; color: #dc2626; }
+            .role-doctor { background: #eff6ff; color: #2563eb; }
+            .role-user { background: #f0fdf4; color: #16a34a; }
+        </style>
+    </th:block>
+</head>
+<body>
+    <th:block th:fragment="breadcrumb_part">
+        <i class="ri-arrow-right-s-line text-xs"></i>
+        <span class="text-slate-600">Quản lý Users</span>
+    </th:block>
+
+    <th:block th:fragment="content_part">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Quản lý Users</h1>
+                <p class="text-slate-400 font-medium text-xs md:text-sm mt-1">Danh sách tài khoản và phân quyền hệ thống.</p>
+            </div>
+            <a href="/users/add" class="bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition shadow-lg font-extrabold text-sm flex items-center">
+                <i class="ri-user-add-line mr-2"></i> Thêm User
+            </a>
+        </div>
+
+        <div class="bg-white rounded-[1rem] shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-sm border-collapse">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="text-left px-6 py-4 text-slate-400 font-black text-[11px] uppercase tracking-widest">ID</th>
+                        <th class="text-left px-6 py-4 text-slate-400 font-black text-[11px] uppercase tracking-widest">Username</th>
+                        <th class="text-left px-6 py-4 text-slate-400 font-black text-[11px] uppercase tracking-widest">Vai trò</th>
+                        <th class="text-right px-6 py-4 text-slate-400 font-black text-[11px] uppercase tracking-widest">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}" class="border-t border-slate-100 hover:bg-slate-50 transition">
+                        <td class="px-6 py-4 text-slate-400 font-bold" th:text="${user.id}"></td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center mr-3 shrink-0">
+                                    <i class="ri-user-3-line text-brand-600"></i>
+                                </div>
+                                <span class="font-extrabold text-slate-800" th:text="${user.username}"></span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span th:classappend="${user.role == 'ROLE_ADMIN'} ? 'role-admin' : (${user.role == 'ROLE_DOCTOR'} ? 'role-doctor' : 'role-user')"
+                                  class="role-badge" th:text="${user.role}"></span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-end space-x-1">
+                                <a th:href="@{/users/edit/{id}(id=${user.id})}"
+                                   class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Sửa">
+                                    <i class="ri-edit-2-line text-lg"></i>
+                                </a>
+                                <button th:onclick="'deleteUser(' + ${user.id} + ')'"
+                                        class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Xóa">
+                                    <i class="ri-delete-bin-line text-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(users)}" class="border-t border-slate-100">
+                        <td colspan="4" class="px-6 py-16 text-center text-slate-400 font-medium">
+                            <i class="ri-user-search-line text-4xl mb-3 block"></i>
+                            Chưa có user nào
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="script_part">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script th:inline="none">
+            function deleteUser(id) {
+                Swal.fire({
+                    title: 'Bạn có chắc chắn?',
+                    text: "Hành động này không thể hoàn tác!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#f1f5f9',
+                    confirmButtonText: 'Có, xóa ngay!',
+                    cancelButtonText: 'Hủy',
+                    background: '#fff',
+                    color: '#1e293b',
+                    customClass: {
+                        popup: 'rounded-3xl border-none shadow-2xl',
+                        confirmButton: 'rounded-xl px-10 py-3 font-bold',
+                        cancelButton: 'rounded-xl px-10 py-3 font-bold text-slate-500'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/users/delete/' + id;
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+</html>
