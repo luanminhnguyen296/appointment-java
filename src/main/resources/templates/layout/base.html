@@ -57,20 +57,23 @@
                 <a href="/" class="nav-item">
                     <i class="ri-information-line"></i><span>Giới thiệu</span>
                 </a>
-                <a href="/patients" class="nav-item">
+                <a href="/patients" class="nav-item" th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_SUB_ADMIN'', ''ROLE_USER'')')}">
                     <i class="ri-group-line"></i><span>Bệnh nhân</span>
                 </a>
-                <a href="/doctors" class="nav-item">
+                <a href="/doctors" class="nav-item" th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_SUB_ADMIN'')')}">
                     <i class="ri-nurse-line"></i><span>Bác sĩ</span>
                 </a>
 
-                <a href="/hospitals" class="nav-item">
+                <a href="/hospitals" class="nav-item" th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_SUB_ADMIN'')')}">
                     <i class="ri-hospital-line"></i><span>Bệnh viện</span>
                 </a>
-                <a href="/specialties" class="nav-item">
+                <a href="/specialties" class="nav-item" th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_SUB_ADMIN'')')}">
                     <i class="ri-heart-pulse-line"></i><span>Chuyên khoa</span>
                 </a>
-                <a href="/users" class="nav-item">
+                <a href="/appointments" class="nav-item" th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_SUB_ADMIN'', ''ROLE_USER'', ''ROLE_DOCTOR'')')}">
+                    <i class="ri-calendar-check-line"></i><span>Lịch hẹn</span>
+                </a>
+                <a href="/users" class="nav-item" th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
                     <i class="ri-shield-user-line"></i><span>Quản lý Users</span>
                 </a>
             </nav>
@@ -90,6 +93,15 @@
                     <i class="ri-menu-2-line text-lg"></i>
                 </button>
                 <h2 class="text-sm font-bold text-slate-800">MediHub Pro</h2>
+            </div>
+            
+            <div class="flex items-center gap-3" th:if="${#authorization.expression('isAuthenticated()')}">
+                <div class="text-right hidden md:block">
+                    <p class="text-sm font-bold text-slate-800" th:text="${#authentication.principal.fullName != null && !#authentication.principal.fullName.isEmpty() ? #authentication.principal.fullName : #authentication.principal.username}"></p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400" th:text="${#strings.replace(#authentication.principal.authorities[0].authority, 'ROLE_', '')}"></p>
+                </div>
+                <img th:src="${#authentication.principal.imageUrl != null ? #authentication.principal.imageUrl : 'https://ui-avatars.com/api/?name=' + (#authentication.principal.fullName != null ? #authentication.principal.fullName : #authentication.principal.username) + '&background=0ea5e9&color=fff'}" 
+                     class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm" alt="Avatar">
             </div>
         </header>
 

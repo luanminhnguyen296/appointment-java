@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập | MediHub</title>
+    <title>Đăng ký tài khoản | MediHub</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
@@ -45,52 +45,50 @@
 
     <!-- Background pattern -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-700/10 rounded-full blur-3xl"></div>
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-brand-700/10 rounded-full blur-3xl"></div>
     </div>
 
     <div class="w-full max-w-md relative">
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-500 rounded-2xl shadow-2xl shadow-brand-500/40 mb-4">
-                <i class="ri-hospital-fill text-3xl text-white"></i>
+                <i class="ri-user-add-fill text-3xl text-white"></i>
             </div>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">MediHub</h1>
-            <p class="text-slate-400 text-sm font-medium mt-1">Hệ thống quản lý phòng khám</p>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Tạo tài khoản</h1>
+            <p class="text-slate-400 text-sm font-medium mt-1">Trở thành thành viên của MediHub</p>
         </div>
 
         <!-- Card -->
         <div class="glass-card rounded-3xl p-8">
-            <h2 class="text-xl font-bold text-white mb-6">Đăng nhập</h2>
-
-            <!-- Alerts -->
-            <div th:if="${param.error}" class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl px-4 py-3 mb-5 text-sm font-medium">
-                <i class="ri-error-warning-line text-lg shrink-0"></i>
-                Tên đăng nhập hoặc mật khẩu không đúng.
-            </div>
+            
             <div th:if="${error}" class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl px-4 py-3 mb-5 text-sm font-medium">
                 <i class="ri-error-warning-line text-lg shrink-0"></i>
                 <span th:text="${error}"></span>
             </div>
-            <div th:if="${param.logout}" class="flex items-center gap-3 bg-green-500/10 border border-green-500/20 text-green-300 rounded-xl px-4 py-3 mb-5 text-sm font-medium">
-                <i class="ri-checkbox-circle-line text-lg shrink-0"></i>
-                Bạn đã đăng xuất thành công.
-            </div>
-            <div th:if="${param.registered}" class="flex items-center gap-3 bg-brand-500/10 border border-brand-500/20 text-brand-300 rounded-xl px-4 py-3 mb-5 text-sm font-medium">
-                <i class="ri-check-double-line text-lg shrink-0"></i>
-                Tạo tài khoản thành công! Vui lòng đăng nhập.
-            </div>
 
-            <form th:action="@{/login}" method="post" class="space-y-5">
+            <form th:action="@{/register}" th:object="${user}" method="post" class="space-y-5">
                 <div>
                     <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
                         Tên đăng nhập
                     </label>
                     <div class="relative">
                         <i class="ri-user-3-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" name="username" id="username" required autofocus
+                        <input type="text" th:field="*{username}" required autofocus
                                class="login-input w-full pl-11 pr-4 py-3.5 rounded-xl font-semibold text-sm"
-                               placeholder="Nhập username...">
+                               placeholder="Nhập tên đăng nhập...">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                        Họ và tên
+                    </label>
+                    <div class="relative">
+                        <i class="ri-profile-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" th:field="*{fullName}" required
+                               class="login-input w-full pl-11 pr-4 py-3.5 rounded-xl font-semibold text-sm"
+                               placeholder="Nhập họ và tên...">
                     </div>
                 </div>
 
@@ -100,21 +98,26 @@
                     </label>
                     <div class="relative">
                         <i class="ri-lock-password-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="password" name="password" id="password" required
+                        <input type="password" th:field="*{password}" required
                                class="login-input w-full pl-11 pr-4 py-3.5 rounded-xl font-semibold text-sm"
-                               placeholder="Nhập mật khẩu...">
+                               placeholder="Tạo mật khẩu...">
                     </div>
                 </div>
 
+                <div class="flex items-center gap-2 mt-2 mb-2">
+                    <input type="checkbox" required id="terms" class="rounded w-4 h-4 border-slate-600 bg-slate-800 text-brand-500 focus:ring-brand-500">
+                    <label for="terms" class="text-xs text-slate-400 font-medium">Tôi đồng ý với <a href="#" class="text-brand-400 hover:text-brand-300 underline">Điều khoản dịch vụ</a>.</label>
+                </div>
+
                 <button type="submit"
-                        class="w-full bg-brand-600 hover:bg-brand-500 text-white font-extrabold py-4 rounded-xl transition shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 mt-2">
-                    <i class="ri-login-box-line text-lg"></i>
-                    Đăng nhập
+                        class="w-full bg-brand-600 hover:bg-brand-500 text-white font-extrabold py-4 rounded-xl transition shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 mt-4">
+                    <i class="ri-user-add-line text-lg"></i>
+                    Đăng ký ngay
                 </button>
             </form>
             
             <div class="mt-6 text-center text-sm font-medium text-slate-400">
-                Chưa có tài khoản? <a href="/register" class="text-brand-400 hover:text-brand-300 font-bold transition">Đăng ký ngay</a>
+                Đã có tài khoản? <a href="/login" class="text-brand-400 hover:text-brand-300 font-bold transition">Đăng nhập</a>
             </div>
         </div>
 

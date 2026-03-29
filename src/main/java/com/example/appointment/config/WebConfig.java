@@ -7,6 +7,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.example.appointment.model.Hospital;
 import com.example.appointment.model.Specialty;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -25,5 +28,12 @@ public class WebConfig implements WebMvcConfigurer {
                 return null;
             return new Specialty(Long.valueOf(source));
         });
+    }
+
+    @Override
+    public void addResourceHandlers(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+        Path userUploadDir = Paths.get("./uploads/users");
+        String userUploadPath = userUploadDir.toFile().getAbsolutePath();
+        registry.addResourceHandler("/uploads/users/**").addResourceLocations("file:" + userUploadPath + "/");
     }
 }

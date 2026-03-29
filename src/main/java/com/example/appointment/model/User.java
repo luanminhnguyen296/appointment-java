@@ -19,6 +19,12 @@ public class User {
     @Column(nullable = false)
     private String role; // e.g., "ROLE_ADMIN", "ROLE_USER"
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "full_name")
+    private String fullName;
+
     // Constructors, Getters, and Setters
 
     public User() {
@@ -60,5 +66,21 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }
